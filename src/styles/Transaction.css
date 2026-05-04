@@ -1,0 +1,129 @@
+.tx-section {
+  display: flex;
+  justify-content: center;
+  padding: 3rem 1rem;
+}
+
+.tx-card {
+  background: #0f1117;
+  border: 1px solid #1e2333;
+  border-radius: 16px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.tx-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #4fffb0;
+}
+
+.tx-sub {
+  font-size: 0.9rem;
+  color: #8892aa;
+}
+
+.tx-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.tx-field label {
+  font-size: 0.8rem;
+  color: #8892aa;
+  font-weight: 500;
+}
+
+.tx-field input {
+  background: #161924;
+  border: 1px solid #1e2333;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  color: #e8ecf4;
+  font-size: 0.95rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.tx-field input:focus {
+  border-color: #4fffb0;
+}
+
+.tx-field input:disabled {
+  opacity: 0.5;
+}
+
+.tx-status {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+}
+
+.tx-status.info {
+  background: rgba(79, 255, 176, 0.08);
+  color: #4fffb0;
+  border: 1px solid rgba(79, 255, 176, 0.2);
+}
+
+.tx-status.success {
+  background: rgba(34, 197, 94, 0.08);
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.tx-status.error {
+  background: rgba(239, 68, 68, 0.08);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.tx-hash {
+  font-size: 0.8rem;
+  color: #8892aa;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  word-break: break-all;
+}
+
+.tx-hash a {
+  color: #4fffb0;
+  font-family: monospace;
+}
+
+.tx-hash a:hover {
+  text-decoration: underline;
+}
+
+.btn-send {
+  padding: 0.85rem;
+  background: #4fffb0;
+  color: #000;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 1rem;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.btn-send:hover:not(:disabled) {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.btn-send:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tx-warn {
+  text-align: center;
+  font-size: 0.8rem;
+  color: #f59e0b;
+}
