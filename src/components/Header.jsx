@@ -26,11 +26,11 @@ function Header({ onSendETH }) {
         {account ? (
           <div className="wallet-connected">
             <div className="wallet-info">
-              <span className="wallet-balance">{balance} ETH</span>
+             <span className="wallet-balance">{balance} ADA</span>
               <span className="wallet-address">{shortAddress(account)}</span>
             </div>
             <button className="btn-send-header" onClick={onSendETH}>
-              💸 Send ETH
+              💸 Send
             </button>
             <button className="btn-disconnect" onClick={disconnect}>
               Disconnect

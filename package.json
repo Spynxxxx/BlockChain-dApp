@@ -10,6 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@blockfrost/blockfrost-js": "^6.1.1",
+    "@emurgo/cardano-serialization-lib-browser": "^15.0.3",
+    "@emurgo/cardano-serialization-lib-nodejs": "^15.0.3",
+    "@meshsdk/core": "^1.9.0-beta.102",
     "ethers": "^6.16.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5"
