@@ -14,8 +14,9 @@ function App() {
         <div className="hero-badge"> BaiChain Powered</div>
         <h1 className="main-title">Welcome to SharEthNotes</h1>
         <p className="main-sub">
-          A decentralized platform to share study notes on the blockchain.
-          Your notes, permanently yours.
+          A decentralized platform to share study notes on the blockchain. Your
+          notes, permanently yours. <br /> To start view uploaded files click
+          explore.
         </p>
       </main>
 

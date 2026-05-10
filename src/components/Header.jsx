@@ -1,7 +1,8 @@
 import { useWallet } from "../hooks/useWallet";
 
 function Header({ onSendETH }) {
-  const { account, balance, connecting, error, connect, disconnect } = useWallet();
+  const { account, balance, connecting, error, connect, disconnect } =
+    useWallet();
 
   function shortAddress(addr) {
     return addr.slice(0, 6) + "..." + addr.slice(-4);
@@ -10,7 +11,6 @@ function Header({ onSendETH }) {
   return (
     <header className="header">
       <div className="header-logo">
-        <img src="/baichain3.png" alt="logo" className="logo-img" />
         <span className="logo-text">SharEthNotes</span>
       </div>
 
@@ -26,7 +26,7 @@ function Header({ onSendETH }) {
         {account ? (
           <div className="wallet-connected">
             <div className="wallet-info">
-             <span className="wallet-balance">{balance} ADA</span>
+              <span className="wallet-balance">{balance} ADA</span>
               <span className="wallet-address">{shortAddress(account)}</span>
             </div>
             <button className="btn-send-header" onClick={onSendETH}>
@@ -37,7 +37,11 @@ function Header({ onSendETH }) {
             </button>
           </div>
         ) : (
-          <button className="btn-connect" onClick={connect} disabled={connecting}>
+          <button
+            className="btn-connect"
+            onClick={connect}
+            disabled={connecting}
+          >
             {connecting ? "Connecting..." : "Connect Wallet"}
           </button>
         )}
