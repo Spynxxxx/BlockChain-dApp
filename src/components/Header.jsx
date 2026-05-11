@@ -1,6 +1,6 @@
 import { useWallet } from "../hooks/useWallet";
 
-function Header({ onSendETH }) {
+function Header({ onSendETH, onNavigate }) {
   const { account, balance, connecting, error, connect, disconnect } =
     useWallet();
 
@@ -15,9 +15,13 @@ function Header({ onSendETH }) {
       </div>
 
       <nav className="header-nav">
-        <a href="#">Explore</a>
+        <a href="#" onClick={() => onNavigate("explore")}>
+          Explore
+        </a>
         <a href="#">My Notes</a>
-        <a href="#">Upload</a>
+        <a href="#" onClick={() => onNavigate("upload")}>
+          Upload
+        </a>
       </nav>
 
       <div className="header-wallet">

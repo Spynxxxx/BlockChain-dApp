@@ -21,7 +21,7 @@ export function useWallet() {
 
       // Get wallet address
       const addresses = await laceApi.getUsedAddresses();
-      const address = addresses[0] || await laceApi.getChangeAddress();
+      const address = addresses[0] || (await laceApi.getChangeAddress());
       setAccount(address);
 
       // Get balance
@@ -36,7 +36,6 @@ export function useWallet() {
       } catch {
         setBalance("10000.00");
       }
-
     } catch (e) {
       setError(e.message || "Connection failed");
     } finally {

@@ -1,0 +1,15 @@
+API key: 07bef6a930584fae888f
+API Secret: 07a0696ffefb318cc6d650b4cd42d61ace3cc4a8c0c7caf449937e1c5b6e04db
+JWT: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiIxOTI3N2RlNC00MmY4LTRiOTgtYjYxYy03OGQwMTI3MzJmNTAiLCJlbWFpbCI6Im5hdmFsY29tbWFuZGVyOEBnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwicGluX3BvbGljeSI6eyJyZWdpb25zIjpbeyJkZXNpcmVkUmVwbGljYXRpb25Db3VudCI6MSwiaWQiOiJGUkExIn0seyJkZXNpcmVkUmVwbGljYXRpb25Db3VudCI6MSwiaWQiOiJOWUMxIn1dLCJ2ZXJzaW9uIjoxfSwibWZhX2VuYWJsZWQiOmZhbHNlLCJzdGF0dXMiOiJBQ1RJVkUifSwiYXV0aGVudGljYXRpb25UeXBlIjoic2NvcGVkS2V5Iiwic2NvcGVkS2V5S2V5IjoiMDdiZWY2YTkzMDU4NGZhZTg4OGYiLCJzY29wZWRLZXlTZWNyZXQiOiIwN2EwNjk2ZmZlZmIzMThjYzZkNjUwYjRjZDQyZDYxYWNlM2NjNGE4YzBjN2NhZjQ0OTkzN2UxYzViNmUwNGRiIiwiZXhwIjoxODEwMDM4Nzc4fQ.KCoGKI25ql5QL_xJsnNaBFqzgOxu1AIzyrHhHIZlNug
+
+Tech Stack:
+
+React — the JavaScript framework we're using to build the UI (all the .jsx files)
+Vite — the tool that runs and builds your React app (npm run dev)
+JavaScript (JS) — the programming language (React is built on top of JS)
+CSS — for styling
+Pinata — the service that uploads files to IPFS
+IPFS — decentralized file storage
+Cardano/Lace — the blockchain and wallet
+Blockfrost — the API that talks to the Cardano blockchain
+localStorage — temporary browser storage to save uploaded note records
