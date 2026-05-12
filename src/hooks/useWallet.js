@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 
 export function useWallet() {
   const [account, setAccount] = useState(null);
@@ -12,22 +12,32 @@ export function useWallet() {
       setError("Lace wallet not found. Please install it.");
       return;
     }
+
     setConnecting(true);
     setError(null);
+
     try {
-      // Enable Lace wallet
+      // connect wallet
       const laceApi = await window.cardano.lace.enable();
+
       setApi(laceApi);
 
-      // Get wallet address
+      // save connection state
+      localStorage.setItem("walletConnected", "true");
+
+      // get address
       const addresses = await laceApi.getUsedAddresses();
+
       const address = addresses[0] || (await laceApi.getChangeAddress());
+
       setAccount(address);
 
-      // Get balance
+      // get balance
       try {
         const balanceCbor = await laceApi.getBalance();
+
         const lovelace = parseInt(balanceCbor, 16);
+
         if (!isNaN(lovelace) && lovelace < 1e15) {
           setBalance((lovelace / 1_000_000).toFixed(2));
         } else {
@@ -43,10 +53,22 @@ export function useWallet() {
     }
   }, []);
 
+  useEffect(() => {
+    const wasConnected = localStorage.getItem("walletConnected");
+
+    if (wasConnected === "true") {
+      setTimeout(() => {
+        connect();
+      }, 200);
+    }
+  }, []);
+
   const disconnect = useCallback(() => {
     setAccount(null);
     setBalance(null);
     setApi(null);
+
+    localStorage.removeItem("walletConnected");
   }, []);
 
   return {

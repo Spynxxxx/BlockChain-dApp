@@ -1,0 +1,67 @@
+.explore-container {
+  width: 100%;
+  padding: 2rem;
+}
+
+.explore-title {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.note-icon {
+  width: 36px;
+  height: 36px;
+}
+
+.notes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+
+  border: 1px solid rgba(189, 186, 186, 0.1);
+  border-radius: 16px;
+  padding: 1.5rem;
+  background: rgba(196, 194, 194, 0.02);
+}
+
+.note-card {
+  background: #111;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1rem;
+  transition: 0.2s ease;
+}
+
+.note-card:hover {
+  transform: translateY(-4px);
+}
+
+.note-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.note-icon {
+  font-size: 2rem;
+}
+
+.note-description {
+  margin: 1rem 0;
+  color: #ccc;
+}
+
+.note-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.view-btn {
+  text-decoration: none;
+  background: #4fffb0;
+  color: black;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-weight: bold;
+}

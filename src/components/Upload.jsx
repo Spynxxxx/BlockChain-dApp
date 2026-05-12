@@ -27,7 +27,7 @@ function Upload({ walletApi, walletAddress }) {
     if (!allowed.includes(f.type)) {
       setStatus({
         type: "error",
-        msg: "Only PDF, images, PPT, or Word files allowed.",
+        msg: "Only PDF, PPT, or Word files allowed.",
       });
       return;
     }
@@ -75,28 +75,15 @@ function Upload({ walletApi, walletAddress }) {
     try {
       // Step 1 — upload file to IPFS
       setStatus({ type: "info", msg: "📤 Uploading to IPFS..." });
-      const cid = await uploadToIPFS(file);
-      const url = `https://gateway.pinata.cloud/ipfs/${cid}`;
-      console.log("CID:", cid);
-      console.log("URL:", url);
-
-      // Step 2 — save record to localStorage
-      const record = {
-        cid,
+      const cid = await uploadToIPFS(file, {
         title: title.trim(),
         subject: subject.trim(),
         description: description.trim(),
         uploader: walletAddress || "anonymous",
-        fileName: file.name,
-        fileType: file.type,
-        timestamp: new Date().toISOString(),
-      };
-
-      const existing = JSON.parse(
-        localStorage.getItem("shareethnotes") || "[]",
-      );
-      existing.unshift(record);
-      localStorage.setItem("shareethnotes", JSON.stringify(existing));
+      });
+      const url = `https://gateway.pinata.cloud/ipfs/${cid}`;
+      console.log("CID:", cid);
+      console.log("URL:", url);
 
       setIpfsLink(url);
       setStatus({
@@ -122,8 +109,6 @@ function Upload({ walletApi, walletAddress }) {
           <h1 className="page-title">Upload Notes</h1>
           <p className="page-subtitle"></p>
         </div>
-
-        {/* Drop zone */}
         <div>
           <input
             ref={fileInputRef}
@@ -161,7 +146,6 @@ function Upload({ walletApi, walletAddress }) {
           )}
         </div>
 
-        {/* Form fields */}
         <div className="upload-form">
           <div className="form-row">
             <div className="form-field">
@@ -204,12 +188,10 @@ function Upload({ walletApi, walletAddress }) {
           </div>
         </div>
 
-        {/* Status message */}
         {status && (
           <div className={`upload-status ${status.type}`}>{status.msg}</div>
         )}
 
-        {/* IPFS link after success */}
         {ipfsLink && (
           <a
             href={ipfsLink}
@@ -226,24 +208,28 @@ function Upload({ walletApi, walletAddress }) {
             your address.
           </p>
         )}
+        <div className="button-wrapper">
+          <button
+            className={`drop-zone ${file ? "has-file" : ""}`}
+            disabled={!walletAddress}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={onDrop}
+            onClick={() => !file && fileInputRef.current.click()}
+          >
+            Upload File
+          </button>
 
-        <button
-          className={`drop-zone ${file ? "has-file" : ""}`}
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={onDrop}
-          onClick={() => !file && fileInputRef.current.click()}
-        >
-          Upload File
-        </button>
-
-        {/* Submit button */}
-        <button
-          className="btn-upload-submit"
-          onClick={handleUpload}
-          disabled={loading || !file}
-        >
-          {loading ? "Uploading..." : "Upload to IPFS"}
-        </button>
+          {/* Submit button */}
+          {file && (
+            <button
+              className="btn-upload-submit"
+              onClick={handleUpload}
+              disabled={loading || !walletAddress}
+            >
+              {loading ? "Uploading..." : "Upload to IPFS"}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

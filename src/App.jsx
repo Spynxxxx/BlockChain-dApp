@@ -5,6 +5,7 @@ import Transaction from "./components/Transaction";
 import Upload from "./components/Upload";
 import "./styles/Header.css";
 import "./styles/Transaction.css";
+import Explore from "./components/Explore";
 
 function App() {
   const wallet = useWallet();
@@ -14,17 +15,7 @@ function App() {
     <div className="app">
       <Header onSendETH={() => setShowTx(true)} onNavigate={setPage} />
       <main className="main">
-        {page === "explore" && (
-          <>
-            <div className="hero-badge"> BaiChain Powered</div>
-            <h1 className="main-title">Welcome to SharEthNotes</h1>
-            <p className="main-sub">
-              A decentralized platform to share study notes on the blockchain.
-              Your notes, permanently yours. <br /> To start view uploaded files
-              click explore.
-            </p>
-          </>
-        )}
+        {page === "explore" && <Explore />}
         {page === "upload" && (
           <Upload walletApi={wallet.api} walletAddress={wallet.account} />
         )}
