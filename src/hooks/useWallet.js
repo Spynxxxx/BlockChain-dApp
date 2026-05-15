@@ -17,22 +17,18 @@ export function useWallet() {
     setError(null);
 
     try {
-      // connect wallet
       const laceApi = await window.cardano.lace.enable();
 
       setApi(laceApi);
 
-      // save connection state
       localStorage.setItem("walletConnected", "true");
 
-      // get address
       const addresses = await laceApi.getUsedAddresses();
 
       const address = addresses[0] || (await laceApi.getChangeAddress());
 
       setAccount(address);
 
-      // get balance
       try {
         const balanceCbor = await laceApi.getBalance();
 

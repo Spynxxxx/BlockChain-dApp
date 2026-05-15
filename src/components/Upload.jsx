@@ -1,4 +1,3 @@
-// Upload.jsx
 import { useState, useRef } from "react";
 import { uploadToIPFS } from "../hooks/usePinata";
 import "../styles/Upload.css";
@@ -80,7 +79,7 @@ function Upload({ walletApi, walletAddress, courseCode }) {
         subject: subject.trim(),
         description: description.trim(),
         uploader: walletAddress || "anonymous",
-        courseCode: courseCode, // ← attach the user's course code
+        courseCode: courseCode,
       });
 
       const url = `https://gateway.pinata.cloud/ipfs/${cid}`;
@@ -104,7 +103,6 @@ function Upload({ walletApi, walletAddress, courseCode }) {
     }
   }
 
-  // Not connected
   if (!walletAddress) {
     return (
       <div className="page-container">
@@ -120,7 +118,6 @@ function Upload({ walletApi, walletAddress, courseCode }) {
     );
   }
 
-  // Connected but no course code (shouldn't normally happen, modal handles it)
   if (!courseCode) {
     return (
       <div className="page-container">
@@ -146,7 +143,6 @@ function Upload({ walletApi, walletAddress, courseCode }) {
           </p>
         </div>
 
-        {/* File picker */}
         <div>
           <input
             ref={fileInputRef}
@@ -184,7 +180,6 @@ function Upload({ walletApi, walletAddress, courseCode }) {
           )}
         </div>
 
-        {/* Form fields */}
         <div className="upload-form">
           <div className="form-row">
             <div className="form-field">
@@ -226,13 +221,9 @@ function Upload({ walletApi, walletAddress, courseCode }) {
             />
           </div>
         </div>
-
-        {/* Status */}
         {status && (
           <div className={`upload-status ${status.type}`}>{status.msg}</div>
         )}
-
-        {/* IPFS link after success */}
         {ipfsLink && (
           <a
             href={ipfsLink}
@@ -244,7 +235,6 @@ function Upload({ walletApi, walletAddress, courseCode }) {
           </a>
         )}
 
-        {/* Buttons */}
         <div className="button-wrapper">
           <button
             className={`drop-zone ${file ? "has-file" : ""}`}

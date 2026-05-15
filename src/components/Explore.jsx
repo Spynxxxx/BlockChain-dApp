@@ -1,4 +1,3 @@
-// Explore.jsx
 import { useEffect, useState } from "react";
 import { getFilesFromPinata } from "../hooks/usePinata";
 import "../styles/Explore.css";
@@ -15,7 +14,6 @@ function Explore({ courseCode, walletAddress }) {
     async function fetchFiles() {
       setLoading(true);
       try {
-        // pass courseCode so Pinata only returns files for this course
         const files = await getFilesFromPinata(courseCode);
         setNotes(files);
       } catch (err) {
@@ -26,7 +24,7 @@ function Explore({ courseCode, walletAddress }) {
     }
 
     fetchFiles();
-  }, [courseCode]); // re-fetch whenever courseCode changes
+  }, [courseCode]);
 
   function fileIcon(type) {
     if (!type) return "📎";
@@ -38,7 +36,6 @@ function Explore({ courseCode, walletAddress }) {
     return "📎";
   }
 
-  // Not connected yet
   if (!walletAddress) {
     return (
       <div className="explore-container">
@@ -49,8 +46,6 @@ function Explore({ courseCode, walletAddress }) {
       </div>
     );
   }
-
-  // Connected but no course code yet (modal should be showing)
   if (!courseCode) {
     return (
       <div className="explore-container">

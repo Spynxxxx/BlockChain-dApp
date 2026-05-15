@@ -1,7 +1,4 @@
-// usePinata.js
 const PINATA_JWT = import.meta.env.VITE_PINATA_JWT;
-
-// ── Upload a file to IPFS via Pinata ────────────────────────────────────────
 export async function uploadToIPFS(file, metadataData) {
   const formData = new FormData();
   formData.append("file", file);
@@ -13,9 +10,9 @@ export async function uploadToIPFS(file, metadataData) {
       subject: metadataData.subject,
       description: metadataData.description,
       uploader: metadataData.uploader,
-      courseCode: metadataData.courseCode, // ← NEW
+      courseCode: metadataData.courseCode,
       fileType: file.type,
-      type: "file", // ← tells us this is a file, not a user record
+      type: "file",
     },
   });
   formData.append("pinataMetadata", metadata);
@@ -38,19 +35,16 @@ export async function uploadToIPFS(file, metadataData) {
   return data.IpfsHash;
 }
 
-// ── Register a user with their course code ───────────────────────────────────
-// Uploads a tiny placeholder file to Pinata tagged with the wallet + course code.
 export async function registerUser(walletAddress, courseCode) {
   const formData = new FormData();
 
-  // Pinata requires a file — we use a tiny 1-byte placeholder
   const blob = new Blob(["x"], { type: "text/plain" });
   formData.append("file", blob, "user_registration.txt");
 
   const metadata = JSON.stringify({
     name: `user_${walletAddress}`,
     keyvalues: {
-      type: "user", // ← marks this as a user record
+      type: "user",
       walletAddress: walletAddress,
       courseCode: courseCode,
     },
@@ -73,9 +67,6 @@ export async function registerUser(walletAddress, courseCode) {
 
   return await res.json();
 }
-
-// ── Look up a wallet address and return their course code ────────────────────
-// Returns the courseCode string if found, or null if not registered yet.
 export async function getUserCourseCode(walletAddress) {
   const res = await fetch(
     `https://api.pinata.cloud/data/pinList?status=pinned` +
@@ -97,10 +88,8 @@ export async function getUserCourseCode(walletAddress) {
     return data.rows[0].metadata?.keyvalues?.courseCode || null;
   }
 
-  return null; // not registered yet → show modal
+  return null;
 }
-
-// ── Fetch all files filtered by course code ──────────────────────────────────
 export async function getFilesFromPinata(courseCode) {
   let url =
     `https://api.pinata.cloud/data/pinList?status=pinned` +
@@ -123,7 +112,6 @@ export async function getFilesFromPinata(courseCode) {
   return data.rows;
 }
 
-// ── Get IPFS gateway URL from a CID ─────────────────────────────────────────
 export function ipfsGatewayUrl(cid) {
   return `https://gateway.pinata.cloud/ipfs/${cid}`;
 }

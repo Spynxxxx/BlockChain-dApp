@@ -1,15 +1,12 @@
-// CourseCodeModal.jsx
-// Appears after wallet connect if the user has no saved course code on Pinata.
-
 import { useState } from "react";
 import { registerUser } from "../hooks/usePinata";
-
+import "../styles/CourseCodeModal.css";
 const VALID_CODES = ["CIT-CS", "CIT-CE", "CIT-IT", "CIT-NURSING"];
 
 function CourseCodeModal({ walletAddress, onSuccess }) {
   const [selected, setSelected] = useState(null);
-  const [loading, setLoading]   = useState(false);
-  const [error, setError]       = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   async function handleConfirm() {
     if (!selected) {
@@ -20,7 +17,7 @@ function CourseCodeModal({ walletAddress, onSuccess }) {
     setError(null);
     try {
       await registerUser(walletAddress, selected);
-      onSuccess(selected); // tell App.jsx the code is confirmed
+      onSuccess(selected);
     } catch (err) {
       console.error(err);
       setError("Failed to save your course code. Please try again.");
@@ -35,8 +32,8 @@ function CourseCodeModal({ walletAddress, onSuccess }) {
         <div className="course-modal-header">
           <h2>Select Your Course</h2>
           <p>
-            Choose your course code. This determines which notes you can see
-            and upload. You can only set this once.
+            Choose your course code. This determines which notes you can see and
+            upload. You can only set this once.
           </p>
         </div>
 
