@@ -1,3 +1,4 @@
+// Explore.jsx
 import { useEffect, useState } from "react";
 import { getFilesFromPinata } from "../hooks/usePinata";
 import "../styles/Explore.css";
@@ -6,15 +7,16 @@ import pdf from "../icons/pdf.png";
 import img from "../icons/img.png";
 import ppt from "../icons/ppt.png";
 
-function Explore() {
+function Explore({ courseCode, walletAddress }) {
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchFiles() {
+      setLoading(true);
       try {
-        const files = await getFilesFromPinata();
-
+        // pass courseCode so Pinata only returns files for this course
+        const files = await getFilesFromPinata(courseCode);
         setNotes(files);
       } catch (err) {
         console.error(err);
@@ -24,7 +26,7 @@ function Explore() {
     }
 
     fetchFiles();
-  }, []);
+  }, [courseCode]); // re-fetch whenever courseCode changes
 
   function fileIcon(type) {
     if (!type) return "📎";
@@ -33,16 +35,44 @@ function Explore() {
     if (type.includes("presentation") || type.includes("powerpoint"))
       return ppt;
     if (type.includes("word") || type.includes("document")) return doc;
-
     return "📎";
+  }
+
+  // Not connected yet
+  if (!walletAddress) {
+    return (
+      <div className="explore-container">
+        <h1 className="explore-title">Explore Notes</h1>
+        <p className="empty-message">
+          🔌 Connect your wallet to view notes for your course.
+        </p>
+      </div>
+    );
+  }
+
+  // Connected but no course code yet (modal should be showing)
+  if (!courseCode) {
+    return (
+      <div className="explore-container">
+        <h1 className="explore-title">Explore Notes</h1>
+        <p className="empty-message">
+          📋 Please select your course code to continue.
+        </p>
+      </div>
+    );
   }
 
   return (
     <div className="explore-container">
-      <h1 className="explore-title">Explore Notes</h1>
+      <div className="explore-header-row">
+        <h1 className="explore-title">Explore Notes</h1>
+        <span className="course-badge">{courseCode}</span>
+      </div>
 
-      {notes.length === 0 ? (
-        <p className="empty-message">No uploaded notes yet.</p>
+      {loading ? (
+        <p className="empty-message">Loading notes...</p>
+      ) : notes.length === 0 ? (
+        <p className="empty-message">No uploaded notes yet for {courseCode}.</p>
       ) : (
         <div className="notes-grid">
           {notes.map((note) => (
@@ -53,12 +83,10 @@ function Explore() {
                   src={fileIcon(note.metadata?.keyvalues?.fileType)}
                   alt="file icon"
                 />
-
                 <div>
                   <h3>
                     {note.metadata?.keyvalues?.title || note.metadata?.name}
                   </h3>
-
                   <p>{note.metadata?.keyvalues?.subject}</p>
                 </div>
               </div>
@@ -71,7 +99,6 @@ function Explore() {
                 <small>
                   {note.metadata?.keyvalues?.uploader?.slice(0, 12)}...
                 </small>
-
                 <a
                   href={`https://gateway.pinata.cloud/ipfs/${note.ipfs_pin_hash}`}
                   target="_blank"

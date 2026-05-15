@@ -3,7 +3,7 @@ import { useState, useRef } from "react";
 import { uploadToIPFS } from "../hooks/usePinata";
 import "../styles/Upload.css";
 
-function Upload({ walletApi, walletAddress }) {
+function Upload({ walletApi, walletAddress, courseCode }) {
   const [file, setFile] = useState(null);
   const [title, setTitle] = useState("");
   const [subject, setSubject] = useState("");
@@ -27,7 +27,7 @@ function Upload({ walletApi, walletAddress }) {
     if (!allowed.includes(f.type)) {
       setStatus({
         type: "error",
-        msg: "Only PDF, PPT, or Word files allowed.",
+        msg: "Only PDF, images, PPT, or Word files allowed.",
       });
       return;
     }
@@ -73,14 +73,16 @@ function Upload({ walletApi, walletAddress }) {
     setIpfsLink(null);
 
     try {
-      // Step 1 — upload file to IPFS
       setStatus({ type: "info", msg: "📤 Uploading to IPFS..." });
+
       const cid = await uploadToIPFS(file, {
         title: title.trim(),
         subject: subject.trim(),
         description: description.trim(),
         uploader: walletAddress || "anonymous",
+        courseCode: courseCode, // ← attach the user's course code
       });
+
       const url = `https://gateway.pinata.cloud/ipfs/${cid}`;
       console.log("CID:", cid);
       console.log("URL:", url);
@@ -102,13 +104,49 @@ function Upload({ walletApi, walletAddress }) {
     }
   }
 
+  // Not connected
+  if (!walletAddress) {
+    return (
+      <div className="page-container">
+        <div className="upload-wrapper">
+          <div className="page-header">
+            <h1 className="page-title">Upload Notes</h1>
+          </div>
+          <p className="wallet-warning">
+            ⚠️ Connect your wallet before uploading.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Connected but no course code (shouldn't normally happen, modal handles it)
+  if (!courseCode) {
+    return (
+      <div className="page-container">
+        <div className="upload-wrapper">
+          <div className="page-header">
+            <h1 className="page-title">Upload Notes</h1>
+          </div>
+          <p className="wallet-warning">
+            ⚠️ Please select your course code first.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="page-container">
       <div className="upload-wrapper">
         <div className="page-header">
           <h1 className="page-title">Upload Notes</h1>
-          <p className="page-subtitle"></p>
+          <p className="page-subtitle">
+            Uploading to: <strong>{courseCode}</strong>
+          </p>
         </div>
+
+        {/* File picker */}
         <div>
           <input
             ref={fileInputRef}
@@ -146,6 +184,7 @@ function Upload({ walletApi, walletAddress }) {
           )}
         </div>
 
+        {/* Form fields */}
         <div className="upload-form">
           <div className="form-row">
             <div className="form-field">
@@ -188,10 +227,12 @@ function Upload({ walletApi, walletAddress }) {
           </div>
         </div>
 
+        {/* Status */}
         {status && (
           <div className={`upload-status ${status.type}`}>{status.msg}</div>
         )}
 
+        {/* IPFS link after success */}
         {ipfsLink && (
           <a
             href={ipfsLink}
@@ -202,16 +243,11 @@ function Upload({ walletApi, walletAddress }) {
             🔗 View your file on IPFS →
           </a>
         )}
-        {!walletAddress && (
-          <p className="wallet-warning">
-            ⚠️ Connect your wallet before uploading so your note is linked to
-            your address.
-          </p>
-        )}
+
+        {/* Buttons */}
         <div className="button-wrapper">
           <button
             className={`drop-zone ${file ? "has-file" : ""}`}
-            disabled={!walletAddress}
             onDragOver={(e) => e.preventDefault()}
             onDrop={onDrop}
             onClick={() => !file && fileInputRef.current.click()}
@@ -219,12 +255,11 @@ function Upload({ walletApi, walletAddress }) {
             Upload File
           </button>
 
-          {/* Submit button */}
           {file && (
             <button
               className="btn-upload-submit"
               onClick={handleUpload}
-              disabled={loading || !walletAddress}
+              disabled={loading}
             >
               {loading ? "Uploading..." : "Upload to IPFS"}
             </button>
