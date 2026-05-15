@@ -86,9 +86,11 @@
 }
 .btn-connect {
   padding: 0.6rem 1.25rem;
+  padding-bottom: 10px;
   background: #4fffb0;
   color: #000;
   border-radius: 8px;
+  border: 1px solid white;
   font-weight: 700;
   font-size: 0.9rem;
   transition: all 0.2s;
@@ -98,8 +100,9 @@
 }
 
 .btn-connect:hover {
-  filter: brightness(1.1);
-  transform: translateY(-1px);
+  background: transparent;
+  border: 1px solid #4fffb0;
+  color: white;
 }
 
 .btn-connect:disabled {
