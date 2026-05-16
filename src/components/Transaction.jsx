@@ -1,7 +1,7 @@
 import { useState } from "react";
 
-const BLOCKFROST_KEY = "preprodjIcVrwYuXuaQWKz50BlyQjJIkDZHt8Ze";
-const BLOCKFROST_URL = "https://cardano-preprod.blockfrost.io/api/v0";
+const BLOCKFROST_KEY = "preview testnetjIcVrwYuXuaQWKz50BlyQjJIkDZHt8Ze";
+const BLOCKFROST_URL = "https://cardano-preview testnet.blockfrost.io/api/v0";
 
 function Transaction() {
   const [toAddress, setToAddress] = useState("");
@@ -265,7 +265,7 @@ if (addrUtxos.length === 0 && toAddress.startsWith("addr")) {
           <div className="tx-hash">
             <span>Tx Hash:</span>
             <a
-              href={`https://preprod.cardanoscan.io/transaction/${txHash}`}
+              href={`https://preview testnet.cardanoscan.io/transaction/${txHash}`}
               target="_blank"
               rel="noopener noreferrer"
             >
