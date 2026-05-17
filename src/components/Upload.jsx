@@ -2,7 +2,8 @@ import { useState, useRef } from "react";
 import { uploadToIPFS } from "../hooks/usePinata";
 import "../styles/Upload.css";
 
-function Upload({ walletApi, walletAddress, courseCode }) {
+function Upload({ walletApi, walletAddress, courseCode, username }) {
+  const [anonymous, setAnonymous] = useState(false);
   const [file, setFile] = useState(null);
   const [title, setTitle] = useState("");
   const [subject, setSubject] = useState("");
@@ -78,7 +79,9 @@ function Upload({ walletApi, walletAddress, courseCode }) {
         title: title.trim(),
         subject: subject.trim(),
         description: description.trim(),
-        uploader: walletAddress || "anonymous",
+        uploader: anonymous
+          ? "Anonymous"
+          : username || walletAddress || "Anonymous",
         courseCode: courseCode,
       });
 
@@ -234,7 +237,22 @@ function Upload({ walletApi, walletAddress, courseCode }) {
             🔗 View your file on IPFS →
           </a>
         )}
-
+        <div className="anonymous-toggle">
+          <label className="anonymous-label">
+            <input
+              type="checkbox"
+              checked={anonymous}
+              onChange={(e) => setAnonymous(e.target.checked)}
+              disabled={loading}
+            />
+            <span>Upload anonymously</span>
+          </label>
+          {!anonymous && username && (
+            <span className="uploading-as">
+              Uploading as: <strong>{username}</strong>
+            </span>
+          )}
+        </div>
         <div className="button-wrapper">
           <button
             className={`drop-zone ${file ? "has-file" : ""}`}

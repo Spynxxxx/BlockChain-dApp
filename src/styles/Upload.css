@@ -308,3 +308,40 @@ h1 {
     font-size: 1.4rem;
   }
 }
+.anonymous-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  background: rgba(79, 255, 176, 0.04);
+  border: 1px solid rgba(79, 255, 176, 0.12);
+  border-radius: 10px;
+}
+
+.anonymous-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  color: #8892aa;
+  font-size: 0.9rem;
+}
+
+.anonymous-label input[type="checkbox"] {
+  accent-color: #4fffb0;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.uploading-as {
+  font-size: 0.82rem;
+  color: #8892aa;
+}
+
+.uploading-as strong {
+  color: #4fffb0;
+}

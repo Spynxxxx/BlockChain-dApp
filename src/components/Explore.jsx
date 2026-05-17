@@ -186,7 +186,7 @@ function Explore({ courseCode, walletAddress, onNavigate }) {
                 <div className="note-footer">
                   {uploader && (
                     <span className="note-uploader" title={uploader}>
-                      👤 {uploader.slice(0, 10)}...
+                      👤 {uploader}
                     </span>
                   )}
                   <a

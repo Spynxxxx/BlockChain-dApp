@@ -35,7 +35,7 @@ export async function uploadToIPFS(file, metadataData) {
   return data.IpfsHash;
 }
 
-export async function registerUser(walletAddress, courseCode) {
+export async function registerUser(walletAddress, courseCode, username) {
   const formData = new FormData();
 
   const blob = new Blob(["x"], { type: "text/plain" });
@@ -47,6 +47,7 @@ export async function registerUser(walletAddress, courseCode) {
       type: "user",
       walletAddress: walletAddress,
       courseCode: courseCode,
+      username: username, // ← new
     },
   });
   formData.append("pinataMetadata", metadata);
@@ -67,7 +68,7 @@ export async function registerUser(walletAddress, courseCode) {
 
   return await res.json();
 }
-export async function getUserCourseCode(walletAddress) {
+export async function getUsername(walletAddress) {
   const res = await fetch(
     `https://api.pinata.cloud/data/pinList?status=pinned` +
       `&metadata[keyvalues][type]={"value":"user","op":"eq"}` +
@@ -78,17 +79,36 @@ export async function getUserCourseCode(walletAddress) {
     },
   );
 
-  if (!res.ok) {
-    throw new Error("Failed to fetch user from Pinata");
-  }
+  if (!res.ok) throw new Error("Failed to fetch username");
 
   const data = await res.json();
-
   if (data.rows && data.rows.length > 0) {
-    return data.rows[0].metadata?.keyvalues?.courseCode || null;
+    return data.rows[0].metadata?.keyvalues?.username || null;
   }
-
   return null;
+}
+export async function getUserProfile(walletAddress) {
+  const res = await fetch(
+    `https://api.pinata.cloud/data/pinList?status=pinned` +
+      `&metadata[keyvalues][type]={"value":"user","op":"eq"}` +
+      `&metadata[keyvalues][walletAddress]={"value":"${walletAddress}","op":"eq"}`,
+    {
+      method: "GET",
+      headers: { Authorization: `Bearer ${PINATA_JWT}` },
+    },
+  );
+
+  if (!res.ok) throw new Error("Failed to fetch user profile");
+
+  const data = await res.json();
+  if (data.rows && data.rows.length > 0) {
+    const kv = data.rows[0].metadata?.keyvalues;
+    return {
+      courseCode: kv?.courseCode || null,
+      username: kv?.username || null,
+    };
+  }
+  return null; // not registered yet
 }
 export async function getFilesFromPinata(courseCode) {
   let url =
