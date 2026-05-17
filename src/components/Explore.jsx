@@ -143,7 +143,7 @@ function Explore({ courseCode, walletAddress, onNavigate }) {
       <div className="explore-hero">
         <div className="explore-header-row">
           <h1 className="explore-title">Explore Notes</h1>
-          <span className="course-badge">{courseCode}</span>
+          <div className="course-code-glow"><span className="course-badge">{courseCode}</span></div>
         </div>
         <p className="explore-subtitle">
           {notes.length} note{notes.length !== 1 ? "s" : ""} available in your

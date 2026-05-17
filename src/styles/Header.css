@@ -22,9 +22,25 @@
   font-size: 1.2rem;
   font-weight: 700;
   color: #4fffb0;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.1em;
   white-space: nowrap;
 }
+.logo-text:hover{
+  cursor: pointer;
+}
+.logo-hover{
+  display: inline-block;
+  border-radius: 20px;
+  transition: all 0.25s ease;
+}
+.logo-hover:hover{
+  border-radius: 20px;
+  backdrop-filter: blur(12px);
+  
+  color: #55db9f;
+  transform: translateY(-1px);
+}
+
 .desktop-nav {
   display: flex;
   gap: 2rem;
@@ -98,12 +114,23 @@
   border: none;
   cursor: pointer;
 }
-
-.btn-connect:hover {
-  background: transparent;
-  border: 1px solid #4fffb0;
-  color: white;
+.btn-connect-glow{
+  display: inline-block;
+  border-radius: 20px;
+  transition: all 0.25s ease;
 }
+.btn-connect-glow:hover{
+  border-radius: 20px;
+  backdrop-filter: blur(12px);
+
+  box-shadow:
+    0 0 5px rgba(92, 228, 166, 0.4),
+    0 0 12px rgba(92, 228, 166, 0.35),
+    0 0 20px rgba(92, 228, 166, 0.25);
+
+  transform: translateY(-1px);
+}
+
 
 .btn-connect:disabled {
   opacity: 0.6;

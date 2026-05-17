@@ -25,7 +25,7 @@ function CourseCodeModal({ walletAddress, onSuccess }) {
 
     try {
       await registerUser(walletAddress, selected, username.trim());
-      onSuccess(selected, username.trim()); // ← pass both back to App.jsx
+      onSuccess(selected, username.trim());
     } catch (err) {
       console.error(err);
       setError("Failed to save your profile. Please try again.");

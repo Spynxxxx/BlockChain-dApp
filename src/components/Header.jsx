@@ -19,7 +19,7 @@ function Header({ onSendETH, onNavigate }) {
     <header className="header">
       <div className="header-top">
         <div className="header-logo">
-          <span className="logo-text">SharEthNotes</span>
+          <div className="logo-hover"><span className="logo-text">SharEth</span></div>
         </div>
 
         <nav className="header-nav desktop-nav">
@@ -52,6 +52,7 @@ function Header({ onSendETH, onNavigate }) {
                 </button>
               </div>
             ) : (
+              <div className="btn-connect-glow">
               <button
                 className="btn-connect"
                 onClick={connect}
@@ -59,6 +60,7 @@ function Header({ onSendETH, onNavigate }) {
               >
                 {connecting ? "Connecting..." : "Connect Wallet"}
               </button>
+              </div>
             )}
           </div>
 
