@@ -1,0 +1,64 @@
+* {
+  cursor: none !important;
+}
+
+.grid-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.header,
+.header *,
+.note-card,
+.note-card *,
+.empty-card,
+.empty-card *,
+.upload-wrapper,
+.upload-wrapper *,
+.modal-box,
+.modal-box *,
+.course-modal,
+.course-modal *,
+.notes-grid-container,
+.notes-grid-container * {
+  cursor: auto !important;
+}
+
+.header a,
+.header button,
+.note-card a,
+.note-card button,
+.upload-wrapper button,
+.upload-wrapper input,
+.modal-box button,
+.course-modal button {
+  cursor: pointer !important;
+}
+
+.custom-cursor {
+  position: fixed;
+  width: 32px;
+  height: 32px;
+  border: 2px solid #4fffb0;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition:
+    width 0.15s ease,
+    height 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+  box-shadow:
+    0 0 8px rgba(79, 255, 176, 0.6),
+    inset 0 0 8px rgba(79, 255, 176, 0.1);
+}
+
+a:hover ~ .custom-cursor,
+button:hover ~ .custom-cursor {
+  width: 44px;
+  height: 44px;
+  border-color: #fff;
+  box-shadow: 0 0 16px rgba(79, 255, 176, 0.8);
+}

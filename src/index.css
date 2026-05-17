@@ -8,7 +8,11 @@
 
 body {
   font-family: "Segoe UI", sans-serif;
-  background: #0a0c10;
+
+  background-size:
+    100% 100%,
+    40px 40px,
+    40px 40px;
   color: #e8ecf4;
   min-height: 100vh;
 }
@@ -27,6 +31,8 @@ a {
 
 .app {
   min-height: 100vh;
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
 }

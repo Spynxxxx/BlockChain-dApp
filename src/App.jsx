@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useWallet } from "./hooks/useWallet";
 import { getUserProfile } from "./hooks/usePinata"; // ← only this, remove getUserCourseCode
 import Header from "./components/Header";
+import GridBackground from "./components/GridBackground";
 import Transaction from "./components/Transaction";
 import Upload from "./components/Upload";
 import Explore from "./components/Explore";
@@ -57,6 +58,7 @@ function App() {
 
   return (
     <div className="app">
+      <GridBackground />
       <Header onSendETH={() => setShowTx(true)} onNavigate={setPage} />
 
       <main className="main">
