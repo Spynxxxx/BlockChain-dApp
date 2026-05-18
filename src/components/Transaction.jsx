@@ -1,7 +1,6 @@
 import { useState } from "react";
 import * as CSL from "@emurgo/cardano-serialization-lib-browser";
 
-// ⚠️ Replace with your Blockfrost PREVIEW API key → https://blockfrost.io
 const BLOCKFROST_KEY = "previewN4X6fbUhv9PpRgsZq48fVfTcNLcc99tf";
 const BLOCKFROST_URL = "https://cardano-preview.blockfrost.io/api/v0";
 
@@ -16,14 +15,12 @@ async function fetchBlockfrost(endpoint) {
   return res.json();
 }
 
-// Browser-native: Uint8Array → hex string (replaces Buffer.from().toString("hex"))
 function bytesToHex(bytes) {
   return Array.from(bytes)
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
 }
 
-// Browser-native: hex string → Uint8Array
 function hexToBytes(hex) {
   const bytes = new Uint8Array(hex.length / 2);
   for (let i = 0; i < hex.length; i += 2)
@@ -32,18 +29,18 @@ function hexToBytes(hex) {
 }
 
 async function buildAndSignTx({ laceApi, toAddress, lovelace }) {
-  // 1. Get UTXOs + change address from Lace
+  // Get UTXOs and change address from Lace
   const utxosCbor  = await laceApi.getUtxos();
   const changeAddr = await laceApi.getChangeAddress();
 
   if (!utxosCbor || utxosCbor.length === 0)
     throw new Error("No UTXOs found in wallet.");
 
-  // 2. Fetch protocol params + latest slot from Blockfrost
+  // Fetch protocol params and latest slot from Blockfrost
   const params = await fetchBlockfrost("/epochs/latest/parameters");
   const tip    = await fetchBlockfrost("/blocks/latest");
 
-  // 3. Build transaction config
+  // Build transaction config
   const coinsPerUtxoByte =
     params.coins_per_utxo_size ?? params.coins_per_utxo_word ?? "4310";
 
@@ -63,7 +60,7 @@ async function buildAndSignTx({ laceApi, toAddress, lovelace }) {
 
   const txBuilder = CSL.TransactionBuilder.new(txBuilderCfg);
 
-  // 4. Add all UTXOs as inputs (CSL v12 API)
+  // Add all UTXOs as inputs
   for (const utxoCbor of utxosCbor) {
     const utxo = CSL.TransactionUnspentOutput.from_hex(utxoCbor);
     txBuilder.add_regular_input(
@@ -73,7 +70,7 @@ async function buildAndSignTx({ laceApi, toAddress, lovelace }) {
     );
   }
 
-  // 5. Add recipient output
+  // Add recipient output
   txBuilder.add_output(
     CSL.TransactionOutput.new(
       CSL.Address.from_bech32(toAddress),
@@ -81,22 +78,22 @@ async function buildAndSignTx({ laceApi, toAddress, lovelace }) {
     )
   );
 
-  // 6. TTL = current slot + 2 hours
+  // TTL = current slot + 2 hours
   txBuilder.set_ttl_bignum(
     CSL.BigNum.from_str(String(tip.slot + 7200))
   );
 
-  // 7. Change back to sender
+  // Change back to sender
   txBuilder.add_change_if_needed(CSL.Address.from_hex(changeAddr));
 
-  // 8. Build unsigned tx — FIX: use bytesToHex instead of Buffer
+  // Build unsigned tx 
   const unsignedTx    = txBuilder.build_tx();
   const unsignedTxHex = bytesToHex(unsignedTx.to_bytes());
 
-  // 9. Sign with Lace — returns witness set CBOR hex
+  // Sign with Lace 
   const witnessHex = await laceApi.signTx(unsignedTxHex, true);
 
-  // 10. Merge witness into tx body — FIX: use bytesToHex instead of Buffer
+  // Merge witness into tx body 
   const signedTx = CSL.Transaction.new(
     unsignedTx.body(),
     CSL.TransactionWitnessSet.from_hex(witnessHex),
@@ -106,7 +103,6 @@ async function buildAndSignTx({ laceApi, toAddress, lovelace }) {
   return bytesToHex(signedTx.to_bytes());
 }
 
-// ---------------------------------------------------------------------------
 
 function Transaction() {
   const [toAddress, setToAddress] = useState("");
@@ -151,7 +147,6 @@ function Transaction() {
         return;
       }
 
-      // Optional balance pre-check via Blockfrost
       try {
         const usedAddresses = await laceApi.getUsedAddresses();
         const walletAddr    = usedAddresses?.[0];
@@ -172,7 +167,7 @@ function Transaction() {
         console.warn("Balance pre-check skipped.");
       }
 
-      // Build + sign transaction
+      // Build and sign transaction
       setStatus({ type: "info", msg: "Building transaction..." });
       const lovelace    = Math.floor(parsedAmount * 1_000_000).toString();
       const signedTxHex = await buildAndSignTx({
@@ -181,7 +176,7 @@ function Transaction() {
         lovelace,
       });
 
-      // Submit via Blockfrost
+      // Submit using Blockfrost
       setStatus({ type: "info", msg: "Submitting to blockchain..." });
       const submitRes = await fetch(`${BLOCKFROST_URL}/tx/submit`, {
         method: "POST",
