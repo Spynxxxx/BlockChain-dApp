@@ -1,235 +1,234 @@
 import { useState } from "react";
+import * as CSL from "@emurgo/cardano-serialization-lib-browser";
 
-const BLOCKFROST_KEY = "preprodjIcVrwYuXuaQWKz50BlyQjJIkDZHt8Ze";
-const BLOCKFROST_URL = "https://cardano-preprod.blockfrost.io/api/v0";
+// ⚠️ Replace with your Blockfrost PREVIEW API key → https://blockfrost.io
+const BLOCKFROST_KEY = "previewN4X6fbUhv9PpRgsZq48fVfTcNLcc99tf";
+const BLOCKFROST_URL = "https://cardano-preview.blockfrost.io/api/v0";
+
+async function fetchBlockfrost(endpoint) {
+  const res = await fetch(`${BLOCKFROST_URL}${endpoint}`, {
+    headers: { project_id: BLOCKFROST_KEY },
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || `Blockfrost error ${res.status}`);
+  }
+  return res.json();
+}
+
+// Browser-native: Uint8Array → hex string (replaces Buffer.from().toString("hex"))
+function bytesToHex(bytes) {
+  return Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+// Browser-native: hex string → Uint8Array
+function hexToBytes(hex) {
+  const bytes = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < hex.length; i += 2)
+    bytes[i / 2] = parseInt(hex.slice(i, i + 2), 16);
+  return bytes;
+}
+
+async function buildAndSignTx({ laceApi, toAddress, lovelace }) {
+  // 1. Get UTXOs + change address from Lace
+  const utxosCbor  = await laceApi.getUtxos();
+  const changeAddr = await laceApi.getChangeAddress();
+
+  if (!utxosCbor || utxosCbor.length === 0)
+    throw new Error("No UTXOs found in wallet.");
+
+  // 2. Fetch protocol params + latest slot from Blockfrost
+  const params = await fetchBlockfrost("/epochs/latest/parameters");
+  const tip    = await fetchBlockfrost("/blocks/latest");
+
+  // 3. Build transaction config
+  const coinsPerUtxoByte =
+    params.coins_per_utxo_size ?? params.coins_per_utxo_word ?? "4310";
+
+  const txBuilderCfg = CSL.TransactionBuilderConfigBuilder.new()
+    .fee_algo(
+      CSL.LinearFee.new(
+        CSL.BigNum.from_str(String(params.min_fee_a)),
+        CSL.BigNum.from_str(String(params.min_fee_b))
+      )
+    )
+    .pool_deposit(CSL.BigNum.from_str(String(params.pool_deposit)))
+    .key_deposit(CSL.BigNum.from_str(String(params.key_deposit)))
+    .max_value_size(Number(params.max_val_size ?? 5000))
+    .max_tx_size(Number(params.max_tx_size ?? 16384))
+    .coins_per_utxo_byte(CSL.BigNum.from_str(String(coinsPerUtxoByte)))
+    .build();
+
+  const txBuilder = CSL.TransactionBuilder.new(txBuilderCfg);
+
+  // 4. Add all UTXOs as inputs (CSL v12 API)
+  for (const utxoCbor of utxosCbor) {
+    const utxo = CSL.TransactionUnspentOutput.from_hex(utxoCbor);
+    txBuilder.add_regular_input(
+      utxo.output().address(),
+      utxo.input(),
+      utxo.output().amount()
+    );
+  }
+
+  // 5. Add recipient output
+  txBuilder.add_output(
+    CSL.TransactionOutput.new(
+      CSL.Address.from_bech32(toAddress),
+      CSL.Value.new(CSL.BigNum.from_str(lovelace))
+    )
+  );
+
+  // 6. TTL = current slot + 2 hours
+  txBuilder.set_ttl_bignum(
+    CSL.BigNum.from_str(String(tip.slot + 7200))
+  );
+
+  // 7. Change back to sender
+  txBuilder.add_change_if_needed(CSL.Address.from_hex(changeAddr));
+
+  // 8. Build unsigned tx — FIX: use bytesToHex instead of Buffer
+  const unsignedTx    = txBuilder.build_tx();
+  const unsignedTxHex = bytesToHex(unsignedTx.to_bytes());
+
+  // 9. Sign with Lace — returns witness set CBOR hex
+  const witnessHex = await laceApi.signTx(unsignedTxHex, true);
+
+  // 10. Merge witness into tx body — FIX: use bytesToHex instead of Buffer
+  const signedTx = CSL.Transaction.new(
+    unsignedTx.body(),
+    CSL.TransactionWitnessSet.from_hex(witnessHex),
+    unsignedTx.auxiliary_data()
+  );
+
+  return bytesToHex(signedTx.to_bytes());
+}
+
+// ---------------------------------------------------------------------------
 
 function Transaction() {
   const [toAddress, setToAddress] = useState("");
-  const [amount, setAmount] = useState("");
-  const [status, setStatus] = useState(null);
-  const [txHash, setTxHash] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [amount, setAmount]       = useState("");
+  const [status, setStatus]       = useState(null);
+  const [txHash, setTxHash]       = useState(null);
+  const [loading, setLoading]     = useState(false);
 
   async function sendTransaction() {
-    if (!window.cardano || !window.cardano.lace) {
-      setStatus({ type: "error", msg: "Lace wallet not found!" });
-      return;
-    }
-    if (!toAddress || !amount) {
-      setStatus({ type: "error", msg: "Please fill in all fields." });
-      return;
-    }
-    if (parseFloat(amount) < 1) {
-      setStatus({ type: "error", msg: "Minimum 1 ADA." });
-      return;
-    }
-
-    setLoading(true);
-    setTxHash(null);
-
     try {
+      if (!window.cardano?.lace) {
+        setStatus({ type: "error", msg: "Lace wallet not found!" });
+        return;
+      }
+      if (!toAddress.trim() || !amount) {
+        setStatus({ type: "error", msg: "Please fill in all fields." });
+        return;
+      }
+      if (!toAddress.trim().startsWith("addr_test1")) {
+        setStatus({ type: "error", msg: "Address must start with addr_test1..." });
+        return;
+      }
 
-      setStatus({ type: "info", msg: "Connecting to Lace..." });
+      const parsedAmount = parseFloat(amount);
+      if (isNaN(parsedAmount) || parsedAmount < 1) {
+        setStatus({ type: "error", msg: "Minimum send amount is 1 ADA." });
+        return;
+      }
+
+      setLoading(true);
+      setTxHash(null);
+
+      // Connect to Lace
+      setStatus({ type: "info", msg: "Connecting to Lace wallet..." });
       const laceApi = await window.cardano.lace.enable();
 
-      setStatus({ type: "info", msg: "Getting wallet info..." });
-      const changeAddrHex = await laceApi.getChangeAddress();
-      const usedAddresses = await laceApi.getUsedAddresses();
-      const utxos = await laceApi.getUtxos();
-
-      console.log("changeAddrHex:", changeAddrHex);
-      console.log("usedAddresses:", usedAddresses);
-      console.log("utxos:", utxos);
-
-      if (!utxos || utxos.length === 0) {
-        setStatus({ type: "error", msg: "No funds in wallet!" });
+      // Verify Preview network (0 = testnet)
+      const networkId = await laceApi.getNetworkId();
+      if (networkId !== 0) {
+        setStatus({ type: "error", msg: "Please switch Lace to Preview network." });
         setLoading(false);
         return;
       }
 
-      setStatus({ type: "info", msg: "Connecting..." });
-      const paramsRes = await fetch(
-        `${BLOCKFROST_URL}/epochs/latest/parameters`,
-        { headers: { project_id: BLOCKFROST_KEY } }
-      );
-
-      if (!paramsRes.ok) {
-        setStatus({ type: "error", msg: "Blockfrost API key invalid!" });
-        setLoading(false);
-        return;
+      // Optional balance pre-check via Blockfrost
+      try {
+        const usedAddresses = await laceApi.getUsedAddresses();
+        const walletAddr    = usedAddresses?.[0];
+        if (walletAddr) {
+          const info        = await fetchBlockfrost(`/addresses/${walletAddr}`);
+          const lovelaceBal = parseInt(info.amount?.find(a => a.unit === "lovelace")?.quantity ?? "0");
+          const balAda      = lovelaceBal / 1_000_000;
+          if (balAda < parsedAmount + 0.5) {
+            setStatus({
+              type: "error",
+              msg: `Insufficient balance. You have ${balAda.toFixed(2)} ADA (need ${parsedAmount} + ~0.5 for fees).`,
+            });
+            setLoading(false);
+            return;
+          }
+        }
+      } catch {
+        console.warn("Balance pre-check skipped.");
       }
 
-      const params = await paramsRes.json();
-      console.log("params:", params);
-
-      setStatus({ type: "info", msg: "Fetching" });
-      const lovelace = Math.floor(parseFloat(amount) * 1_000_000);
-      const fee = 200000;
-
-      const addressesToTry = [
-        ...usedAddresses,
-        changeAddrHex
-      ].filter(Boolean);
-
-      console.log("Addresses to try:", addressesToTry);
-
-      let addrUtxos = [];
-      let workingAddr = null;
-      for (const addr of addressesToTry) {
-  try {
-    
-    const addrInfoRes = await fetch(
-      `${BLOCKFROST_URL}/addresses/${addr}`,
-      { headers: { project_id: BLOCKFROST_KEY } }
-    );
-    console.log(`Address info ${addr} status:`, addrInfoRes.status);
-
-    let lookupAddr = addr;
-    if (addrInfoRes.ok) {
-      const addrInfo = await addrInfoRes.json();
-      console.log("Address info:", addrInfo);
-      lookupAddr = addrInfo.address || addr;
-    }
-
-   
-    const res = await fetch(
-      `${BLOCKFROST_URL}/addresses/${lookupAddr}/utxos`,
-      { headers: { project_id: BLOCKFROST_KEY } }
-    );
-    console.log(`UTXOs for ${lookupAddr} status:`, res.status);
-    if (res.ok) {
-      const data = await res.json();
-      console.log(`UTXOs for ${lookupAddr}:`, data);
-      if (data && data.length > 0) {
-        addrUtxos = data;
-        workingAddr = lookupAddr;
-        break;
-      }
-    }
-  } catch (e) {
-    console.log("Error fetching address:", e);
-  }
-}
-
-if (addrUtxos.length === 0 && toAddress.startsWith("addr")) {
-  console.log("Trying toAddress directly:", toAddress);
-  try {
-    const res = await fetch(
-      `${BLOCKFROST_URL}/addresses/${toAddress}/utxos`,
-      { headers: { project_id: BLOCKFROST_KEY } }
-    );
-    console.log("toAddress UTXOs status:", res.status);
-    if (res.ok) {
-      const data = await res.json();
-      console.log("toAddress UTXOs:", data);
-      if (data && data.length > 0) {
-        addrUtxos = data;
-        workingAddr = toAddress;
-      }
-    }
-  } catch (e) {
-    console.log("toAddress error:", e);
-  }
-}
-
-      if (addrUtxos.length === 0) {
-        setStatus({
-          type: "error",
-          msg: "No UTXOs found. Check browser console (F12) for details."
-        });
-        setLoading(false);
-        return;
-      }
-
-      console.log("Working address:", workingAddr);
-      console.log("UTXOs found:", addrUtxos);
-
-      const selectedUtxo = addrUtxos.find(u => {
-        const amt = u.amount.find(a => a.unit === "lovelace");
-        return amt && parseInt(amt.quantity) >= lovelace + fee;
+      // Build + sign transaction
+      setStatus({ type: "info", msg: "Building transaction..." });
+      const lovelace    = Math.floor(parsedAmount * 1_000_000).toString();
+      const signedTxHex = await buildAndSignTx({
+        laceApi,
+        toAddress: toAddress.trim(),
+        lovelace,
       });
 
-      if (!selectedUtxo) {
-        setStatus({
-          type: "error",
-          msg: `Insufficient funds! Need ${((lovelace + fee) / 1_000_000).toFixed(2)} ADA.`
-        });
-        setLoading(false);
-        return;
-      }
-
-      const inputLovelace = parseInt(
-        selectedUtxo.amount.find(a => a.unit === "lovelace").quantity
-      );
-      const changeLovelace = inputLovelace - lovelace - fee;
-
-     
-      setStatus({ type: "info", msg: "Please sign in Lace wallet..." });
-      const utxoHex = utxos[0];
-      console.log("Signing utxoHex:", utxoHex);
-
-      let witnessHex;
-      try {
-        witnessHex = await laceApi.signTx(utxoHex, true);
-        console.log("witnessHex:", witnessHex);
-      } catch (signErr) {
-        setStatus({
-          type: "error",
-          msg: "Signing failed: " + signErr.message
-        });
-        setLoading(false);
-        return;
-      }
-    
+      // Submit via Blockfrost
       setStatus({ type: "info", msg: "Submitting to blockchain..." });
       const submitRes = await fetch(`${BLOCKFROST_URL}/tx/submit`, {
         method: "POST",
         headers: {
           project_id: BLOCKFROST_KEY,
-          "Content-Type": "application/cbor"
+          "Content-Type": "application/cbor",
         },
-        body: hexToBytes(witnessHex)
+        body: hexToBytes(signedTxHex),
       });
 
-      console.log("Submit status:", submitRes.status);
-
-      if (submitRes.ok) {
-        const hash = await submitRes.text();
-        setTxHash(hash.replace(/"/g, ""));
-        setStatus({ type: "success", msg: "Transaction confirmed! ✅" });
-        setToAddress("");
-        setAmount("");
-      } else {
-        const errData = await submitRes.json();
-        console.log("Submit error:", errData);
-        setTxHash(selectedUtxo.tx_hash);
-        setStatus({
-          type: "success",
-          msg: `Signed! ${amount} ADA → ${toAddress.slice(0, 12)}... Fee: ${(fee / 1_000_000).toFixed(4)} ADA`
-        });
+      if (!submitRes.ok) {
+        const errData = await submitRes.json().catch(() => ({}));
+        throw new Error(errData.message || "Transaction submission failed.");
       }
 
-    } catch (e) {
-      console.log("Error:", e);
-      setStatus({ type: "error", msg: e.message || "Transaction failed." });
+      const hash = (await submitRes.text()).replace(/"/g, "");
+      console.log("Transaction Hash:", hash);
+
+      setTxHash(hash);
+      setStatus({ type: "success", msg: "Transaction confirmed! ✅" });
+      setToAddress("");
+      setAmount("");
+
+    } catch (err) {
+      console.error("Transaction Error:", err);
+
+      let msg = "Transaction failed.";
+      if (err?.message) {
+        if (err.message.includes("Insufficient") || err.message.includes("UTxO")) {
+          msg = "Insufficient ADA balance (include ~0.5 ADA for fees).";
+        } else if (err.message.toLowerCase().includes("declined")) {
+          msg = "Transaction rejected in wallet.";
+        } else {
+          msg = err.message;
+        }
+      }
+      setStatus({ type: "error", msg });
     } finally {
       setLoading(false);
     }
-  }
-
-  function hexToBytes(hex) {
-    const bytes = new Uint8Array(hex.length / 2);
-    for (let i = 0; i < hex.length; i += 2) {
-      bytes[i / 2] = parseInt(hex.substr(i, 2), 16);
-    }
-    return bytes;
   }
 
   return (
     <div className="tx-section">
       <div className="tx-card">
         <h2 className="tx-title">💸 Send ADA</h2>
-        <p className="tx-sub">Submit a transaction</p>
+        <p className="tx-sub">Send ADA using Cardano Preview Network</p>
 
         <div className="tx-field">
           <label>Recipient Address</label>
@@ -247,25 +246,23 @@ if (addrUtxos.length === 0 && toAddress.startsWith("addr")) {
           <input
             type="number"
             placeholder="1"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
             min="1"
             step="1"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
             disabled={loading}
           />
         </div>
 
         {status && (
-          <div className={`tx-status ${status.type}`}>
-            {status.msg}
-          </div>
+          <div className={`tx-status ${status.type}`}>{status.msg}</div>
         )}
 
         {txHash && (
           <div className="tx-hash">
             <span>Tx Hash:</span>
             <a
-              href={`https://preprod.cardanoscan.io/transaction/${txHash}`}
+              href={`https://preview.cardanoscan.io/transaction/${txHash}`}
               target="_blank"
               rel="noopener noreferrer"
             >
