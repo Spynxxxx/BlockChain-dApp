@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const dns = require("dns");
 
-dns.setServers(["1.1.1.1"]);
+dns.setServers(["1.1.1.1", "8.8.8.8"]);
 
 require("dotenv").config();
 
@@ -19,7 +19,7 @@ app.get("/", (req, res) => {
 });
 
 const URI = process.env.MONGODB_URI;
-
+console.log("Your URI is:", process.env.MONGODB_URI);
 console.log("Connecting to MongoDB...");
 
 mongoose
