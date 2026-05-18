@@ -29,18 +29,15 @@ function hexToBytes(hex) {
 }
 
 async function buildAndSignTx({ laceApi, toAddress, lovelace }) {
-  // Get UTXOs and change address from Lace
   const utxosCbor  = await laceApi.getUtxos();
   const changeAddr = await laceApi.getChangeAddress();
 
   if (!utxosCbor || utxosCbor.length === 0)
     throw new Error("No UTXOs found in wallet.");
 
-  // Fetch protocol params and latest slot from Blockfrost
   const params = await fetchBlockfrost("/epochs/latest/parameters");
   const tip    = await fetchBlockfrost("/blocks/latest");
 
-  // Build transaction config
   const coinsPerUtxoByte =
     params.coins_per_utxo_size ?? params.coins_per_utxo_word ?? "4310";
 
@@ -60,7 +57,6 @@ async function buildAndSignTx({ laceApi, toAddress, lovelace }) {
 
   const txBuilder = CSL.TransactionBuilder.new(txBuilderCfg);
 
-  // Add all UTXOs as inputs
   for (const utxoCbor of utxosCbor) {
     const utxo = CSL.TransactionUnspentOutput.from_hex(utxoCbor);
     txBuilder.add_regular_input(
@@ -70,7 +66,6 @@ async function buildAndSignTx({ laceApi, toAddress, lovelace }) {
     );
   }
 
-  // Add recipient output
   txBuilder.add_output(
     CSL.TransactionOutput.new(
       CSL.Address.from_bech32(toAddress),
@@ -78,22 +73,17 @@ async function buildAndSignTx({ laceApi, toAddress, lovelace }) {
     )
   );
 
-  // TTL = current slot + 2 hours
   txBuilder.set_ttl_bignum(
     CSL.BigNum.from_str(String(tip.slot + 7200))
   );
 
-  // Change back to sender
   txBuilder.add_change_if_needed(CSL.Address.from_hex(changeAddr));
 
-  // Build unsigned tx 
   const unsignedTx    = txBuilder.build_tx();
   const unsignedTxHex = bytesToHex(unsignedTx.to_bytes());
 
-  // Sign with Lace 
   const witnessHex = await laceApi.signTx(unsignedTxHex, true);
 
-  // Merge witness into tx body 
   const signedTx = CSL.Transaction.new(
     unsignedTx.body(),
     CSL.TransactionWitnessSet.from_hex(witnessHex),
@@ -135,11 +125,9 @@ function Transaction() {
       setLoading(true);
       setTxHash(null);
 
-      // Connect to Lace
       setStatus({ type: "info", msg: "Connecting to Lace wallet..." });
       const laceApi = await window.cardano.lace.enable();
 
-      // Verify Preview network (0 = testnet)
       const networkId = await laceApi.getNetworkId();
       if (networkId !== 0) {
         setStatus({ type: "error", msg: "Please switch Lace to Preview network." });
@@ -167,7 +155,6 @@ function Transaction() {
         console.warn("Balance pre-check skipped.");
       }
 
-      // Build and sign transaction
       setStatus({ type: "info", msg: "Building transaction..." });
       const lovelace    = Math.floor(parsedAmount * 1_000_000).toString();
       const signedTxHex = await buildAndSignTx({
@@ -176,7 +163,6 @@ function Transaction() {
         lovelace,
       });
 
-      // Submit using Blockfrost
       setStatus({ type: "info", msg: "Submitting to blockchain..." });
       const submitRes = await fetch(`${BLOCKFROST_URL}/tx/submit`, {
         method: "POST",
