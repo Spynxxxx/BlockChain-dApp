@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { registerUser } from "../hooks/usePinata";
+import { registerUser } from "../hooks/useAuth";
 import "../styles/CourseCodeModal.css";
 
 const VALID_CODES = ["CIT-CS", "CIT-CE", "CIT-IT", "CIT-NURSING"];
@@ -28,7 +28,13 @@ function CourseCodeModal({ walletAddress, onSuccess }) {
       onSuccess(selected, username.trim());
     } catch (err) {
       console.error(err);
-      setError("Failed to save your profile. Please try again.");
+      if (err.message === "NETWORK_ERROR") {
+        setError("Cannot connect to server. Make sure the backend is running.");
+      } else {
+        setError(
+          err.message || "Failed to save your profile. Please try again.",
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -57,7 +63,6 @@ function CourseCodeModal({ walletAddress, onSuccess }) {
           />
         </div>
 
-        {/* Course code selection */}
         <label
           className="formTitle"
           style={{ marginBottom: "0.5rem", display: "block" }}

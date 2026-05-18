@@ -13,3 +13,10 @@ IPFS — decentralized file storage
 Cardano/Lace — the blockchain and wallet
 Blockfrost — the API that talks to the Cardano blockchain
 localStorage — temporary browser storage to save uploaded note records
+monggoDB
+
+
+monggoDB user : budskie
+pass : DaYnY0g0J2nhOZIR
+
+mongodb+srv://Budskie:DaYnY0g0J2nhOZIR@cluster0.wu8lg5z.mongodb.net/?appName=Cluster0

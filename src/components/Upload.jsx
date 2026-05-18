@@ -174,8 +174,15 @@ function Upload({ walletApi, walletAddress, courseCode, username }) {
               </button>
             </div>
           ) : (
-            <div className="drop-prompt">
-              <p>Drop your file here or click to browse</p>
+            <div
+              className="drop-prompt"
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={onDrop}
+              onClick={() => !file && fileInputRef.current.click()}
+            >
+              <p className="drop-hint">
+                Drop your file here or click to browse
+              </p>
               <span className="drop-hint">
                 PDF, Images, PPT, Word — max 50MB
               </span>
@@ -254,15 +261,6 @@ function Upload({ walletApi, walletAddress, courseCode, username }) {
           )}
         </div>
         <div className="button-wrapper">
-          <button
-            className={`drop-zone ${file ? "has-file" : ""}`}
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={onDrop}
-            onClick={() => !file && fileInputRef.current.click()}
-          >
-            Upload File
-          </button>
-
           {file && (
             <button
               className="btn-upload-submit"

@@ -5,7 +5,6 @@ h1 {
   margin: 0 0 0.4rem;
 }
 
-/* ── Page container ────────────────────────────────────────── */
 .page-container {
   display: flex;
   align-items: center;
@@ -26,7 +25,6 @@ h1 {
   overflow: hidden;
 }
 
-/* Neon shimmer at the top of the card */
 .upload-wrapper::before {
   content: "";
   position: absolute;
@@ -39,7 +37,6 @@ h1 {
   pointer-events: none;
 }
 
-/* ── Page header ───────────────────────────────────────────── */
 .page-header {
   margin-bottom: 1.5rem;
   text-align: center;
@@ -62,7 +59,6 @@ h1 {
   color: #4fffb0;
 }
 
-/* ── File preview ──────────────────────────────────────────── */
 .file-preview {
   display: flex;
   align-items: center;
@@ -110,7 +106,6 @@ h1 {
   color: #ef4444;
 }
 
-/* ── Drop prompt ───────────────────────────────────────────── */
 .drop-prompt {
   text-align: center;
   padding: 1.5rem;
@@ -118,8 +113,8 @@ h1 {
   border-radius: 12px;
   margin-bottom: 1.2rem;
   color: #8892aa;
+  cursor: pointer;
 }
-
 .drop-prompt p {
   margin: 0 0 0.3rem;
   color: #f0f0f0;
@@ -128,7 +123,6 @@ h1 {
   font-size: 0.8rem;
 }
 
-/* ── Upload file button (drop zone) ───────────────────────── */
 .drop-zone {
   color: #000;
   font-weight: bold;
@@ -157,7 +151,6 @@ h1 {
   box-shadow: none;
 }
 
-/* ── Form ──────────────────────────────────────────────────── */
 .upload-form {
   display: flex;
   flex-direction: column;
@@ -189,6 +182,9 @@ h1 {
   font-size: 0.85rem;
   font-weight: 700;
 }
+.formTitle:hover {
+  cursor: text;
+}
 
 .textField {
   background: rgba(255, 255, 255, 0.04);
@@ -216,7 +212,6 @@ h1 {
   color: #4a5568;
 }
 
-/* ── Status messages ───────────────────────────────────────── */
 .upload-status {
   padding: 0.8rem 1rem;
   border-radius: 10px;
@@ -237,7 +232,6 @@ h1 {
   color: #ef4444;
 }
 
-/* ── IPFS success link ─────────────────────────────────────── */
 .ipfs-success-link {
   display: block;
   text-align: center;
@@ -252,7 +246,6 @@ h1 {
   opacity: 0.8;
 }
 
-/* ── Wallet warning ────────────────────────────────────────── */
 .wallet-warning {
   text-align: center;
   font-size: 0.85rem;
@@ -260,7 +253,6 @@ h1 {
   margin-bottom: 1rem;
 }
 
-/* ── Button wrapper ────────────────────────────────────────── */
 .button-wrapper {
   display: flex;
   justify-content: center;
@@ -268,7 +260,6 @@ h1 {
   flex-wrap: wrap;
 }
 
-/* ── Submit button ─────────────────────────────────────────── */
 .btn-upload-submit {
   border-radius: 10px;
   border: 1px solid #4fffb0;
@@ -296,7 +287,6 @@ h1 {
   box-shadow: none;
 }
 
-/* ── Responsive ────────────────────────────────────────────── */
 @media (max-width: 600px) {
   .upload-wrapper {
     padding: 1.5rem 1rem;

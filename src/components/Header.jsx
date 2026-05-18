@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { useWallet } from "../hooks/useWallet";
-
-function Header({ onSendETH, onNavigate }) {
-  const { account, balance, connecting, error, connect, disconnect } =
-    useWallet();
+import LogoutModal from "./LogoutModal";
+function Header({ onSendETH, onNavigate, wallet }) {
+  const { account, balance, connecting, error, connect, disconnect } = wallet;
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   function shortAddress(addr) {
     return addr.slice(0, 6) + "..." + addr.slice(-4);
@@ -14,12 +13,24 @@ function Header({ onSendETH, onNavigate }) {
     onNavigate(page);
     setMenuOpen(false);
   }
+  const handleDisconnectClick = () => {
+    setShowLogoutModal(true);
+  };
+  const handleDisconnectYes = () => {
+    disconnect();
+    setShowLogoutModal(false);
+  };
+  const handleDisconnectNo = () => {
+    setShowLogoutModal(false);
+  };
 
   return (
     <header className="header">
       <div className="header-top">
         <div className="header-logo">
-          <div className="logo-hover"><span className="logo-text">SharEth</span></div>
+          <div className="logo-hover">
+            <span className="logo-text">SharEth</span>
+          </div>
         </div>
 
         <nav className="header-nav desktop-nav">
@@ -47,19 +58,28 @@ function Header({ onSendETH, onNavigate }) {
                 <button className="btn-send-header" onClick={onSendETH}>
                   💸 Send
                 </button>
-                <button className="btn-disconnect" onClick={disconnect}>
+                <button
+                  className="btn-disconnect"
+                  onClick={handleDisconnectClick}
+                >
                   Disconnect
                 </button>
+                {showLogoutModal && (
+                  <LogoutModal
+                    onConfirm={handleDisconnectYes}
+                    onCancel={handleDisconnectNo}
+                  />
+                )}
               </div>
             ) : (
               <div className="btn-connect-glow">
-              <button
-                className="btn-connect"
-                onClick={connect}
-                disabled={connecting}
-              >
-                {connecting ? "Connecting..." : "Connect Wallet"}
-              </button>
+                <button
+                  className="btn-connect"
+                  onClick={connect}
+                  disabled={connecting}
+                >
+                  {connecting ? "Connecting..." : "Connect Wallet"}
+                </button>
               </div>
             )}
           </div>

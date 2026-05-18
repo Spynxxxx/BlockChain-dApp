@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
-import { useWallet } from "./hooks/useWallet";
-import { getUserProfile } from "./hooks/usePinata"; // ← only this, remove getUserCourseCode
-import Header from "./components/Header";
-import GridBackground from "./components/GridBackground";
-import Transaction from "./components/Transaction";
-import Upload from "./components/Upload";
-import Explore from "./components/Explore";
-import CourseCodeModal from "./components/CourseCodeModal";
-import "./styles/Header.css";
-import "./styles/Transaction.css";
+import { useWallet } from "../hooks/useWallet";
+import { getUserProfile } from "../hooks/useAuth";
+import Header from "./Header";
+import GridBackground from "./GridBackground";
+import Transaction from "./Transaction";
+import Upload from "./Upload";
+import Explore from "./Explore";
+import CourseCodeModal from "./CourseCodeModal";
+import "../styles/Header.css";
+import "../styles/Transaction.css";
 
 function App() {
   const wallet = useWallet();
@@ -31,6 +31,7 @@ function App() {
       setCheckingCode(true);
       try {
         const profile = await getUserProfile(wallet.account);
+
         if (profile) {
           setCourseCode(profile.courseCode);
           setUsername(profile.username);
@@ -39,9 +40,15 @@ function App() {
           setShowModal(true);
         }
       } catch (err) {
-        console.error("Failed to check profile:", err);
-        // prevents to show the modal if the user is already authorized
-        setShowModal(false);
+        console.error("Failed to check profile:", err.message);
+        if (err.message === "NETWORK_ERROR") {
+          setShowModal(false);
+          alert(
+            "⚠️ Cannot connect to server. Make sure your backend is running on port 5000.",
+          );
+        } else {
+          setShowModal(true);
+        }
       } finally {
         setCheckingCode(false);
       }
@@ -59,7 +66,11 @@ function App() {
   return (
     <div className="app">
       <GridBackground />
-      <Header onSendETH={() => setShowTx(true)} onNavigate={setPage} />
+      <Header
+        onSendETH={() => setShowTx(true)}
+        onNavigate={setPage}
+        wallet={wallet}
+      />
 
       <main className="main">
         {checkingCode && (

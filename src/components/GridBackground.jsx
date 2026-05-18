@@ -7,6 +7,10 @@ function GridBackground() {
   const animRef = useRef();
 
   useEffect(() => {
+    function onMouseMove(e) {
+      mouse.current.x = e.clientX;
+      mouse.current.y = e.clientY;
+    }
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     const SPACING = 40;

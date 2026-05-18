@@ -9,9 +9,20 @@ import ppt from "../icons/ppt.png";
 function Explore({ courseCode, walletAddress, onNavigate }) {
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const NOTES_PER_PAGE = 9;
+  const [currentPage, setCurrentPage] = useState(1);
 
+  const totalPages = Math.ceil(notes.length / NOTES_PER_PAGE);
+  const startIndex = (currentPage - 1) * NOTES_PER_PAGE;
+  const currentNotes = notes.slice(startIndex, startIndex + NOTES_PER_PAGE);
   useEffect(() => {
     async function fetchFiles() {
+      setCurrentPage(1);
+      if (!courseCode || !walletAddress) {
+        setNotes([]);
+        setLoading(false);
+        return;
+      }
       setLoading(true);
       try {
         const files = await getFilesFromPinata(courseCode);
@@ -23,7 +34,7 @@ function Explore({ courseCode, walletAddress, onNavigate }) {
       }
     }
     fetchFiles();
-  }, [courseCode]);
+  }, [courseCode, walletAddress]);
 
   function fileIcon(type) {
     if (!type) return null;
@@ -35,14 +46,14 @@ function Explore({ courseCode, walletAddress, onNavigate }) {
     return null;
   }
 
-  // ── Not connected ───────────────────────────────────────────
+  //wallet wapa na connect sa lace
   if (!walletAddress) {
     return (
       <div className="explore-container">
         <div className="explore-hero">
           <h1 className="explore-title">Explore Notes</h1>
           <p className="explore-subtitle">
-            Discover and share academic materials on the blockchain.
+            Find the notes that you are looking for in your course!
           </p>
         </div>
         <div className="empty-card">
@@ -59,7 +70,7 @@ function Explore({ courseCode, walletAddress, onNavigate }) {
     );
   }
 
-  // ── No course code yet ──────────────────────────────────────
+  // connected sa lace pero walay sulod ang files
   if (!courseCode) {
     return (
       <div className="explore-container">
@@ -82,7 +93,6 @@ function Explore({ courseCode, walletAddress, onNavigate }) {
     );
   }
 
-  // ── Loading ─────────────────────────────────────────────────
   if (loading) {
     return (
       <div className="explore-container">
@@ -107,7 +117,6 @@ function Explore({ courseCode, walletAddress, onNavigate }) {
     );
   }
 
-  // ── Empty — no notes yet ────────────────────────────────────
   if (notes.length === 0) {
     return (
       <div className="explore-container">
@@ -143,7 +152,9 @@ function Explore({ courseCode, walletAddress, onNavigate }) {
       <div className="explore-hero">
         <div className="explore-header-row">
           <h1 className="explore-title">Explore Notes</h1>
-          <div className="course-code-glow"><span className="course-badge">{courseCode}</span></div>
+          <div className="course-code-glow">
+            <span className="course-badge">{courseCode}</span>
+          </div>
         </div>
         <p className="explore-subtitle">
           {notes.length} note{notes.length !== 1 ? "s" : ""} available in your
@@ -153,7 +164,7 @@ function Explore({ courseCode, walletAddress, onNavigate }) {
 
       <div className="notes-grid-container">
         <div className="notes-grid">
-          {notes.map((note) => {
+          {currentNotes.map((note) => {
             const icon = fileIcon(note.metadata?.keyvalues?.fileType);
             const title =
               note.metadata?.keyvalues?.title || note.metadata?.name;
@@ -202,6 +213,39 @@ function Explore({ courseCode, walletAddress, onNavigate }) {
             );
           })}
         </div>
+        {totalPages > 1 && (
+          <div className="pagination">
+            <button
+              className="page-btn"
+              onClick={() => setCurrentPage((p) => p - 1)}
+              disabled={currentPage === 1}
+            >
+              ← Prev
+            </button>
+
+            <div className="page-numbers">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                (num) => (
+                  <button
+                    key={num}
+                    className={`page-num ${currentPage === num ? "page-active" : ""}`}
+                    onClick={() => setCurrentPage(num)}
+                  >
+                    {num}
+                  </button>
+                ),
+              )}
+            </div>
+
+            <button
+              className="page-btn"
+              onClick={() => setCurrentPage((p) => p + 1)}
+              disabled={currentPage === totalPages}
+            >
+              Next →
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
