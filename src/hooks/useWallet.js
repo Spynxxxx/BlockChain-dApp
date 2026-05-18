@@ -38,7 +38,6 @@ export function useWallet() {
     const laceApi = await window.cardano.lace.enable();
     setApi(laceApi);
 
-    // Get wallet address
     const addresses = await laceApi.getUsedAddresses();
     const address = addresses[0] || (await laceApi.getChangeAddress());
     setAccount(address);
@@ -52,12 +51,10 @@ export function useWallet() {
     }
   }, []);
 
-  // Auto-reconnect on page load if previously connected
   useEffect(() => {
     async function autoReconnect() {
       if (!localStorage.getItem("walletConnected")) return;
 
-      // Wait for Lace to inject into window.cardano
       let attempts = 0;
       while (!window.cardano?.lace && attempts < 10) {
         await new Promise((r) => setTimeout(r, 500));
