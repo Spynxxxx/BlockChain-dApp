@@ -98,7 +98,7 @@ function GridBackground() {
   return (
     <>
       <canvas ref={canvasRef} className="grid-canvas" />
-      <div className="custom-cursor" id="customCursor" />
+      {/* <div className="custom-cursor" id="customCursor" /> */}
     </>
   );
 }

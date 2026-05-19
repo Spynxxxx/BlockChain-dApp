@@ -1,9 +1,5 @@
-// usePinata.js
-// Only handles file uploads and fetching — user auth moved to useAuth.js
-
 const PINATA_JWT = import.meta.env.VITE_PINATA_JWT;
 
-// ── Upload a file to IPFS via Pinata ─────────────────────────
 export async function uploadToIPFS(file, metadataData) {
   const formData = new FormData();
   formData.append("file", file);
@@ -40,10 +36,9 @@ export async function uploadToIPFS(file, metadataData) {
   return data.IpfsHash;
 }
 
-// ── Fetch all files filtered by course code ───────────────────
 export async function getFilesFromPinata(courseCode) {
   let url =
-    `https://api.pinata.cloud/data/pinList?status=pinned` +
+    `https://api.pinata.cloud/data/pinList?status=pinned&pageLimit=1000` +
     `&metadata[keyvalues][type]={"value":"file","op":"eq"}`;
 
   if (courseCode) {
