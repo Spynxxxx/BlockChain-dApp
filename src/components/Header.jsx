@@ -40,6 +40,9 @@ function Header({ onSendETH, onNavigate, wallet }) {
           <a href="#" onClick={() => handleNavigate("mynotes")}>
             My Notes
           </a>
+          <a href="#" onClick={() => handleNavigate("myuploads")}>
+            My Uploads
+          </a>
           <a href="#" onClick={() => handleNavigate("upload")}>
             Upload
           </a>

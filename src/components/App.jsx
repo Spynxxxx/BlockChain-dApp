@@ -10,6 +10,7 @@ import MyNotes from "./MyNotes";
 import CourseCodeModal from "./CourseCodeModal";
 import "../styles/Header.css";
 import "../styles/Transaction.css";
+import MyUploads from "./MyUploads";
 
 function App() {
   const wallet = useWallet();
@@ -96,6 +97,13 @@ function App() {
 
         {!checkingCode && page === "mynotes" && (
           <MyNotes walletAddress={wallet.account} onNavigate={setPage} />
+        )}
+        {!checkingCode && page === "myuploads" && (
+          <MyUploads
+            walletAddress={wallet.account}
+            username={username}
+            onNavigate={setPage}
+          />
         )}
       </main>
 
