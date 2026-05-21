@@ -44,3 +44,4 @@ UPDATES:
 nig send sa file mag need ug 1 ada, and preferably 10 ada to view/download a file
 implement the My Notes
 implement search Feature
+if mo send ug file na na upload kay dile na ka upload(issue) - fixed

@@ -2,14 +2,14 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
 
-router.get("/debug", async (req, res) => {
-  try {
-    const users = await User.find({});
-    res.json(users);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
+// router.get("/debug", async (req, res) => {
+//   try {
+//     const users = await User.find({});
+//     res.json(users);
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// });
 
 //POST /api/users/register
 router.post("/register", async (req, res) => {

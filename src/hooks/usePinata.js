@@ -5,7 +5,7 @@ export async function uploadToIPFS(file, metadataData) {
   formData.append("file", file);
 
   const metadata = JSON.stringify({
-    name: file.name,
+    name: `${file.name}_${Date.now()}`,
     keyvalues: {
       title: metadataData.title,
       subject: metadataData.subject,
@@ -18,7 +18,10 @@ export async function uploadToIPFS(file, metadataData) {
   });
   formData.append("pinataMetadata", metadata);
 
-  const options = JSON.stringify({ cidVersion: 1 });
+  const options = JSON.stringify({
+    cidVersion: 1,
+    wrapWithDirectory: true,
+  });
   formData.append("pinataOptions", options);
 
   const res = await fetch("https://api.pinata.cloud/pinning/pinFileToIPFS", {
