@@ -58,7 +58,6 @@ export async function getFilesFromPinata(courseCode) {
   return data.rows;
 }
 
-// ── Get IPFS gateway URL from a CID ──────────────────────────
 export function ipfsGatewayUrl(cid) {
   return `https://gateway.pinata.cloud/ipfs/${cid}`;
 }

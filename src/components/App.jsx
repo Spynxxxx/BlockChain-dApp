@@ -6,6 +6,7 @@ import GridBackground from "./GridBackground";
 import Transaction from "./Transaction";
 import Upload from "./Upload";
 import Explore from "./Explore";
+import MyNotes from "./MyNotes";
 import CourseCodeModal from "./CourseCodeModal";
 import "../styles/Header.css";
 import "../styles/Transaction.css";
@@ -27,11 +28,9 @@ function App() {
         setShowModal(false);
         return;
       }
-
       setCheckingCode(true);
       try {
         const profile = await getUserProfile(wallet.account);
-
         if (profile) {
           setCourseCode(profile.courseCode);
           setUsername(profile.username);
@@ -53,7 +52,6 @@ function App() {
         setCheckingCode(false);
       }
     }
-
     checkProfile();
   }, [wallet.account]);
 
@@ -94,6 +92,10 @@ function App() {
             courseCode={courseCode}
             username={username}
           />
+        )}
+
+        {!checkingCode && page === "mynotes" && (
+          <MyNotes walletAddress={wallet.account} onNavigate={setPage} />
         )}
       </main>
 

@@ -66,3 +66,6 @@
   font-weight: 600;
   font-size: 0.85rem;
 }
+.modal-backdrop {
+  cursor: auto !important;
+}

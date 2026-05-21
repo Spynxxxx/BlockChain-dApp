@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getFilesFromPinata } from "../hooks/usePinata";
+import { saveNote, unsaveNote, getSavedNotes } from "../hooks/useAuth";
 import "../styles/Explore.css";
 import doc from "../icons/doc.png";
 import pdf from "../icons/pdf.png";
@@ -11,6 +12,7 @@ function Explore({ courseCode, walletAddress, onNavigate }) {
   const [loading, setLoading] = useState(true);
   const NOTES_PER_PAGE = 9;
   const [currentPage, setCurrentPage] = useState(1);
+  const [savedHashes, setSavedHashes] = useState(new Set());
 
   const totalPages = Math.ceil(notes.length / NOTES_PER_PAGE);
   const startIndex = (currentPage - 1) * NOTES_PER_PAGE;
@@ -25,8 +27,12 @@ function Explore({ courseCode, walletAddress, onNavigate }) {
       }
       setLoading(true);
       try {
-        const files = await getFilesFromPinata(courseCode);
+        const [files, saved] = await Promise.all([
+          getFilesFromPinata(courseCode),
+          getSavedNotes(walletAddress),
+        ]);
         setNotes(files);
+        setSavedHashes(new Set(saved.map((n) => n.ipfsHash)));
       } catch (err) {
         console.error(err);
       } finally {
@@ -35,7 +41,32 @@ function Explore({ courseCode, walletAddress, onNavigate }) {
     }
     fetchFiles();
   }, [courseCode, walletAddress]);
+  async function toggleSave(note) {
+    if (!walletAddress) return;
+    const hash = note.ipfs_pin_hash;
+    const isSaved = savedHashes.has(hash);
 
+    setSavedHashes((prev) => {
+      const next = new Set(prev);
+      isSaved ? next.delete(hash) : next.add(hash);
+      return next;
+    });
+
+    try {
+      if (isSaved) {
+        await unsaveNote(walletAddress, hash);
+      } else {
+        await saveNote(walletAddress, note);
+      }
+    } catch (err) {
+      console.error("Toggle save failed:", err.message);
+      setSavedHashes((prev) => {
+        const next = new Set(prev);
+        isSaved ? next.add(hash) : next.delete(hash);
+        return next;
+      });
+    }
+  }
   function fileIcon(type) {
     if (!type) return null;
     if (type.includes("pdf")) return pdf;
@@ -188,6 +219,18 @@ function Explore({ courseCode, walletAddress, onNavigate }) {
                     <h3 className="note-title">{title}</h3>
                     {subject && <span className="note-subject">{subject}</span>}
                   </div>
+
+                  <button
+                    className={`save-btn ${savedHashes.has(note.ipfs_pin_hash) ? "save-btn-active" : ""}`}
+                    onClick={() => toggleSave(note)}
+                    title={
+                      savedHashes.has(note.ipfs_pin_hash)
+                        ? "Remove from My Notes"
+                        : "Save to My Notes"
+                    }
+                  >
+                    {savedHashes.has(note.ipfs_pin_hash) ? "🗂️" : "📁"}
+                  </button>
                 </div>
 
                 {description && (
