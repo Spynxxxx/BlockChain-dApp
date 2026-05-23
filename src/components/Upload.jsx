@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { uploadToIPFS } from "../hooks/usePinata";
+import { sendUploadFee } from "../hooks/useCardano";
 import "../styles/Upload.css";
 
 function Upload({ walletApi, walletAddress, courseCode, username }) {
@@ -68,13 +69,37 @@ function Upload({ walletApi, walletAddress, courseCode, username }) {
       setStatus({ type: "error", msg: "Subject is required." });
       return;
     }
+    if (!walletApi) {
+      setStatus({ type: "error", msg: "Wallet not connected." });
+      return;
+    }
 
     setLoading(true);
     setIpfsLink(null);
 
     try {
-      setStatus({ type: "info", msg: "📤 Uploading to IPFS..." });
+      // ── Step 1: Send 1 ADA transaction on Cardano ─────────────
+      setStatus({
+        type: "info",
+        msg: "💳 Please approve 1 ADA transaction in Lace...",
+      });
+      console.log("walletApi:", walletApi); // ← add this
+      console.log("Starting transaction...");
+      const txHash = await sendUploadFee(walletApi, {
+        title: title.trim(),
+        subject: subject.trim(),
+        uploader: anonymous
+          ? "Anonymous"
+          : username || walletAddress || "Anonymous",
+        courseCode: courseCode,
+      });
 
+      setStatus({
+        type: "info",
+        msg: `✅ Transaction confirmed! Now uploading to IPFS...`,
+      });
+
+      // ── Step 2: Upload file to IPFS ───────────────────────────
       const cid = await uploadToIPFS(file, {
         title: title.trim(),
         subject: subject.trim(),
@@ -87,13 +112,11 @@ function Upload({ walletApi, walletAddress, courseCode, username }) {
       });
 
       const url = `https://gateway.pinata.cloud/ipfs/${cid}`;
-      console.log("CID:", cid);
-      console.log("URL:", url);
 
       setIpfsLink(url);
       setStatus({
         type: "success",
-        msg: "🎉 Upload successful! Your note is now on IPFS.",
+        msg: `🎉 Upload successful! Tx: ${txHash.slice(0, 12)}...`,
       });
       setFile(null);
       setTitle("");
@@ -101,7 +124,18 @@ function Upload({ walletApi, walletAddress, courseCode, username }) {
       setDescription("");
     } catch (err) {
       console.error(err);
-      setStatus({ type: "error", msg: err.message || "Upload failed." });
+      // if user rejected the transaction, don't upload to IPFS
+      if (
+        err.message?.toLowerCase().includes("declined") ||
+        err.message?.toLowerCase().includes("user")
+      ) {
+        setStatus({
+          type: "error",
+          msg: "Transaction cancelled. File was not uploaded.",
+        });
+      } else {
+        setStatus({ type: "error", msg: err.message || "Upload failed." });
+      }
     } finally {
       setLoading(false);
     }
@@ -268,7 +302,7 @@ function Upload({ walletApi, walletAddress, courseCode, username }) {
               onClick={handleUpload}
               disabled={loading}
             >
-              {loading ? "Uploading..." : "Upload to IPFS"}
+              {loading ? "Processing..." : "Upload to IPFS (1 ADA fee)"}
             </button>
           )}
         </div>
