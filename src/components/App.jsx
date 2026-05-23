@@ -64,11 +64,16 @@ function App() {
 
   return (
     <div className="app">
-      <GridBackground />
       <Header
         onSendETH={() => setShowTx(true)}
         onNavigate={setPage}
         wallet={wallet}
+        username={username}
+      />
+      <GridBackground
+        username={username}
+        wallet={wallet}
+        courseCode={courseCode}
       />
 
       <main className="main">

@@ -82,6 +82,7 @@ function Upload({ walletApi, walletAddress, courseCode, username }) {
         uploader: anonymous
           ? "Anonymous"
           : username || walletAddress || "Anonymous",
+        uploaderRef: username || walletAddress,
         courseCode: courseCode,
       });
 

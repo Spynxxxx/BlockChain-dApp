@@ -11,6 +11,7 @@ export async function uploadToIPFS(file, metadataData) {
       subject: metadataData.subject,
       description: metadataData.description,
       uploader: metadataData.uploader,
+      uploaderRef: metadataData.uploaderRef,
       courseCode: metadataData.courseCode,
       fileType: file.type,
       type: "file",
@@ -62,20 +63,37 @@ export async function getFilesFromPinata(courseCode) {
   return data.rows;
 }
 export async function getMyUploads(username) {
-  const url =
-    `https://api.pinata.cloud/data/pinList?status=pinned&pageLimit=1000` +
-    `&metadata[keyvalues][type]={"value":"file","op":"eq"}` +
-    `&metadata[keyvalues][uploader]={"value":"${username}","op":"eq"}`;
+  const [regularRes, anonymousRes] = await Promise.all([
+    fetch(
+      `https://api.pinata.cloud/data/pinList?status=pinned&pageLimit=1000` +
+        `&metadata[keyvalues][type]={"value":"file","op":"eq"}` +
+        `&metadata[keyvalues][uploader]={"value":"${username}","op":"eq"}`,
+      { method: "GET", headers: { Authorization: `Bearer ${PINATA_JWT}` } },
+    ),
+    fetch(
+      `https://api.pinata.cloud/data/pinList?status=pinned&pageLimit=1000` +
+        `&metadata[keyvalues][type]={"value":"file","op":"eq"}` +
+        `&metadata[keyvalues][uploaderRef]={"value":"${username}","op":"eq"}`,
+      { method: "GET", headers: { Authorization: `Bearer ${PINATA_JWT}` } },
+    ),
+  ]);
 
-  const res = await fetch(url, {
-    method: "GET",
-    headers: { Authorization: `Bearer ${PINATA_JWT}` },
+  if (!regularRes.ok || !anonymousRes.ok) {
+    throw new Error("Failed to fetch your uploads");
+  }
+
+  const [regularData, anonymousData] = await Promise.all([
+    regularRes.json(),
+    anonymousRes.json(),
+  ]);
+
+  const combined = [...regularData.rows, ...anonymousData.rows];
+  const seen = new Set();
+  return combined.filter((note) => {
+    if (seen.has(note.ipfs_pin_hash)) return false;
+    seen.add(note.ipfs_pin_hash);
+    return true;
   });
-
-  if (!res.ok) throw new Error("Failed to fetch your uploads");
-
-  const data = await res.json();
-  return data.rows;
 }
 
 export async function unpinFile(ipfsHash) {

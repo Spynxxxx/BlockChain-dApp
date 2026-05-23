@@ -1,7 +1,8 @@
 import { useEffect, useRef } from "react";
 import "../styles/GridBackground.css";
 
-function GridBackground() {
+function GridBackground({ wallet, username, courseCode }) {
+  const account = wallet;
   const canvasRef = useRef();
   const mouse = useRef({ x: -9999, y: -9999 });
   const animRef = useRef();
@@ -99,6 +100,14 @@ function GridBackground() {
     <>
       <canvas ref={canvasRef} className="grid-canvas" />
       {/* <div className="custom-cursor" id="customCursor" /> */}
+      {wallet.account && username && courseCode && (
+        <div className="username-bar">
+          <span className="username-bar-text">
+            👤 Logged in as <strong>{username}</strong>
+          </span>
+          <div className="courseCode-popup">Course Code: {courseCode}</div>
+        </div>
+      )}
     </>
   );
 }

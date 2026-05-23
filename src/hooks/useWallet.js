@@ -10,13 +10,14 @@ function decodeCborBalance(hex) {
     if (first === 0x19) return (bytes[1] << 8) | bytes[2];
     if (first === 0x1a) {
       return (
-        ((bytes[1] << 24) | (bytes[2] << 16) | (bytes[3] << 8) | bytes[4]) >>>
-        0
+        ((bytes[1] << 24) | (bytes[2] << 16) | (bytes[3] << 8) | bytes[4]) >>> 0
       );
     }
     if (first === 0x1b) {
-      const hi = (bytes[1] * 2 ** 24 + bytes[2] * 2 ** 16 + bytes[3] * 2 ** 8 + bytes[4]);
-      const lo = (bytes[5] * 2 ** 24 + bytes[6] * 2 ** 16 + bytes[7] * 2 ** 8 + bytes[8]);
+      const hi =
+        bytes[1] * 2 ** 24 + bytes[2] * 2 ** 16 + bytes[3] * 2 ** 8 + bytes[4];
+      const lo =
+        bytes[5] * 2 ** 24 + bytes[6] * 2 ** 16 + bytes[7] * 2 ** 8 + bytes[8];
       return hi * 2 ** 32 + lo;
     }
 
@@ -28,11 +29,11 @@ function decodeCborBalance(hex) {
 }
 
 export function useWallet() {
-  const [account, setAccount]     = useState(null);
-  const [balance, setBalance]     = useState(null);
-  const [api, setApi]             = useState(null);
+  const [account, setAccount] = useState(null);
+  const [balance, setBalance] = useState(null);
+  const [api, setApi] = useState(null);
   const [connecting, setConnecting] = useState(false);
-  const [error, setError]         = useState(null);
+  const [error, setError] = useState(null);
 
   const enableWallet = useCallback(async () => {
     const laceApi = await window.cardano.lace.enable();

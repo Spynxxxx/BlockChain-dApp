@@ -157,7 +157,10 @@ function MyUploads({ walletAddress, username, onNavigate }) {
           </span>
         </div>
         <p className="explore-subtitle">
-          Files you have uploaded — only you can delete these.
+          These are your uploads, you can also see the files that you have
+          uploaded as Anonymous.
+          <br />
+          You can also delete you uploaded Files!
         </p>
       </div>
 
@@ -202,7 +205,12 @@ function MyUploads({ walletAddress, username, onNavigate }) {
                 )}
 
                 <div className="note-footer">
-                  <span className="note-uploader">👤 {username}</span>
+                  <span className="note-uploader">
+                    👤{" "}
+                    {note.metadata?.keyvalues?.uploader === "Anonymous"
+                      ? `${username} ( Anonymous )`
+                      : username}
+                  </span>
                   <a
                     href={`https://gateway.pinata.cloud/ipfs/${note.ipfs_pin_hash}`}
                     target="_blank"

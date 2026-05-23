@@ -111,7 +111,7 @@ function MyNotes({ walletAddress, onNavigate }) {
               className="empty-upload-btn"
               onClick={() => onNavigate("explore")}
             >
-              Browse Notes →
+              Explore Notes →
             </button>
           )}
         </div>

@@ -70,3 +70,69 @@ button:hover ~ .custom-cursor {
 .explore-header-row:hover {
   cursor: pointer;
 }
+.username-bar {
+  padding-top: 20px;
+  padding-left: 20px;
+  position: relative;
+  animation: slideInLeft 0.5s ease forwards;
+  max-width: max-content;
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.username-bar-text {
+  font-size: 0.78rem;
+  color: #8892aa;
+  letter-spacing: 0.02em;
+  border: 1px solid #4fffb0;
+  border-radius: 5px;
+  padding: 0.5em;
+  background: #1f3b2d;
+  backdrop-filter: blur(12px);
+  width: max-content;
+  display: inline-block;
+  transition: box-shadow 0.2s;
+}
+
+.username-bar-text:hover {
+  box-shadow: 0 0 12px rgba(79, 255, 176, 0.3);
+}
+
+.username-bar-text strong {
+  color: #4fffb0;
+  font-weight: 600;
+}
+
+.courseCode-popup {
+  position: absolute;
+  font-size: 0.75rem;
+  color: #4fffb0;
+  letter-spacing: 0.02em;
+  margin-top: 6px;
+  background: #1f3b2d;
+  border: 1px solid rgba(79, 255, 176, 0.3);
+  border-radius: 5px;
+  padding: 0.4em 0.6em;
+  margin-left: 40px;
+  width: max-content;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+  pointer-events: none;
+}
+
+.username-bar:hover .courseCode-popup {
+  opacity: 1;
+  transform: translateY(0);
+}
