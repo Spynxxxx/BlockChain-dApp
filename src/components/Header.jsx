@@ -1,6 +1,6 @@
 import { useState } from "react";
 import LogoutModal from "./LogoutModal";
-function Header({ onSendETH, onNavigate, wallet }) {
+function Header({ onSendETH, onNavigate, wallet, currentPage }) {
   const { account, balance, connecting, error, connect, disconnect } = wallet;
   const [menuOpen, setMenuOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -34,16 +34,32 @@ function Header({ onSendETH, onNavigate, wallet }) {
         </div>
 
         <nav className="header-nav desktop-nav">
-          <a href="#" onClick={() => handleNavigate("explore")}>
+          <a
+            href="#"
+            onClick={() => handleNavigate("explore")}
+            className={currentPage === "explore" ? "active" : ""}
+          >
             Explore
           </a>
-          <a href="#" onClick={() => handleNavigate("mynotes")}>
+          <a
+            href="#"
+            onClick={() => handleNavigate("mynotes")}
+            className={currentPage === "mynotes" ? "active" : ""}
+          >
             My Notes
           </a>
-          <a href="#" onClick={() => handleNavigate("myuploads")}>
+          <a
+            href="#"
+            onClick={() => handleNavigate("myuploads")}
+            className={currentPage === "myuploads" ? "active" : ""}
+          >
             My Uploads
           </a>
-          <a href="#" onClick={() => handleNavigate("upload")}>
+          <a
+            href="#"
+            onClick={() => handleNavigate("upload")}
+            className={currentPage === "upload" ? "active" : ""}
+          >
             Upload
           </a>
         </nav>
@@ -102,11 +118,32 @@ function Header({ onSendETH, onNavigate, wallet }) {
       </div>
 
       <nav className={`mobile-nav ${menuOpen ? "mobile-nav-open" : ""}`}>
-        <a href="#" onClick={() => handleNavigate("explore")}>
+        <a
+          href="#"
+          onClick={() => handleNavigate("explore")}
+          className={currentPage === "explore" ? "active" : ""}
+        >
           Explore
         </a>
-        <a href="#">My Notes</a>
-        <a href="#" onClick={() => handleNavigate("upload")}>
+        <a
+          href="#"
+          onClick={() => handleNavigate("mynotes")}
+          className={currentPage === "mynotes" ? "active" : ""}
+        >
+          My Notes
+        </a>
+        <a
+          href="#"
+          onClick={() => handleNavigate("myuploads")}
+          className={currentPage === "myuploads" ? "active" : ""}
+        >
+          My Uploads
+        </a>
+        <a
+          href="#"
+          onClick={() => handleNavigate("upload")}
+          className={currentPage === "upload" ? "active" : ""}
+        >
           Upload
         </a>
       </nav>

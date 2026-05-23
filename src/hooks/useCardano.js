@@ -37,6 +37,9 @@ export async function sendUploadFee(laceApi, metadata) {
     : CSL.Address.from_hex(toAddress).to_bech32();
 
   const utxosCbor = await laceApi.getUtxos();
+  if (!utxosCbor || utxosCbor.length === 0) {
+    throw new Error("Insufficient ADA. Your wallet appears to be empty.");
+  }
   const ONE_ADA = "1000000";
 
   const params = await fetchBlockfrost("/epochs/latest/parameters");

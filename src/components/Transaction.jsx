@@ -33,7 +33,7 @@ async function buildAndSignTx({ laceApi, toAddress, lovelace }) {
   const changeAddr = await laceApi.getChangeAddress();
 
   if (!utxosCbor || utxosCbor.length === 0)
-    throw new Error("No UTXOs found in wallet.");
+    throw new Error("Insufficient ADA. Your wallet appears to be empty.");
 
   const params = await fetchBlockfrost("/epochs/latest/parameters");
   const tip    = await fetchBlockfrost("/blocks/latest");

@@ -67,6 +67,7 @@ function App() {
       <Header
         onSendETH={() => setShowTx(true)}
         onNavigate={setPage}
+        currentPage={page}
         wallet={wallet}
         username={username}
       />
