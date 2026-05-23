@@ -23,16 +23,12 @@ VITE_PINATA_JWT=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOns
 VITE_API_URL=http://localhost:5000
 
 BlockChain-dApp/shareth-backend/.env:
-MONGODB_URI=mongodb+srv://navalcommander8_db_user:Vx3COLjCY9yZrFDw@cluster0.y2o6ayv.mongodb.net/?appName=Cluster0
+MONGODB_URI=mongodb+srv://navalcommander8_db_user:Vx3COLjCY9yZrFDw@cluster0.y2o6ayv.mongodb.net/shareethnotes?appName=Cluster0
 PORT=5000
 
 # navalcommander8_db_user
 
 # Vx3COLjCY9yZrFDw
-
-# mongodb+srv://navalcommander8_db_user:Vx3COLjCY9yZrFDw@cluster0.y2o6ayv.mongodb.net/?appName=Cluster0
-
-# mongodb+srv://navalcommander8_db_user:Vx3COLjCY9yZrFDw@cluster0.y2o6ayv.mongodb.net/?appName=Cluster0
 
 <!-- mongodb+srv://navalcommander8_db_user:Vx3COLjCY9yZrFDw@cluster0.y2o6ayv.mongodb.net/?appName=Cluster0 -->
 

@@ -12,7 +12,8 @@ function MyUploads({ walletAddress, username, onNavigate }) {
   const [showConfirm, setShowConfirm] = useState(false);
   const [selectedNote, setSelectedNote] = useState(null);
   const [deleting, setDeleting] = useState(false);
-
+  const [search, setSearch] = useState("");
+  const [submittedSearch, setSubmittedSearch] = useState("");
   useEffect(() => {
     async function fetchUploads() {
       if (!walletAddress || !username) {
@@ -146,14 +147,23 @@ function MyUploads({ walletAddress, username, onNavigate }) {
       </div>
     );
   }
-
+  const filteredNotes = notes.filter((note) => {
+    const q = submittedSearch.toLowerCase();
+    if (!q) return true;
+    const title = note.metadata?.keyvalues?.title?.toLowerCase() || "";
+    const subject = note.metadata?.keyvalues?.subject?.toLowerCase() || "";
+    return title.includes(q) || subject.includes(q);
+  });
+  function handleSearch() {
+    setSubmittedSearch(search);
+  }
   return (
     <div className="myuploads-container">
       <div className="explore-hero">
         <div className="explore-header-row">
           <h1 className="explore-title">My Uploads</h1>
           <span className="course-badge">
-            {notes.length} file{notes.length !== 1 ? "s" : ""}
+            {filteredNotes.length} file{filteredNotes.length !== 1 ? "s" : ""}
           </span>
         </div>
         <p className="explore-subtitle">
@@ -163,68 +173,125 @@ function MyUploads({ walletAddress, username, onNavigate }) {
           You can also delete you uploaded Files!
         </p>
       </div>
-
-      <div className="notes-grid-container">
-        <div className="notes-grid">
-          {notes.map((note) => {
-            const icon = fileIcon(note.metadata?.keyvalues?.fileType);
-            const title =
-              note.metadata?.keyvalues?.title || note.metadata?.name;
-            const subject = note.metadata?.keyvalues?.subject;
-            const description = note.metadata?.keyvalues?.description;
-
-            return (
-              <div className="note-card" key={note.ipfs_pin_hash}>
-                <div className="note-card-glow" />
-
-                <div className="note-header">
-                  <div className="note-icon-wrap">
-                    {icon ? (
-                      <img className="note-icon" src={icon} alt="file icon" />
-                    ) : (
-                      <span className="note-icon-fallback">📎</span>
-                    )}
-                  </div>
-                  <div className="note-header-text">
-                    <h3 className="note-title">{title}</h3>
-                    {subject && <span className="note-subject">{subject}</span>}
-                  </div>
-
-                  {/* Delete button */}
-                  <button
-                    className="delete-btn"
-                    onClick={() => handleDeleteClick(note)}
-                    title="Delete this file"
-                  >
-                    🗑️
-                  </button>
-                </div>
-
-                {description && (
-                  <p className="note-description">{description}</p>
-                )}
-
-                <div className="note-footer">
-                  <span className="note-uploader">
-                    👤{" "}
-                    {note.metadata?.keyvalues?.uploader === "Anonymous"
-                      ? `${username} ( Anonymous )`
-                      : username}
-                  </span>
-                  <a
-                    href={`https://gateway.pinata.cloud/ipfs/${note.ipfs_pin_hash}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="view-btn"
-                  >
-                    View File
-                  </a>
-                </div>
-              </div>
-            );
-          })}
+      {notes.length > 0 && (
+        <div className="search-bar">
+          <span className="search-icon">🔍</span>
+          <input
+            type="text"
+            placeholder="Search by title or subject..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+            className="search-input"
+          />
+          {search && (
+            <button
+              className="search-clear"
+              onClick={() => {
+                setSearch("");
+                setSubmittedSearch(""); // ← clears results too
+              }}
+            >
+              ✕
+            </button>
+          )}
+          <button className="search-submit-btn" onClick={handleSearch}>
+            Search
+          </button>
         </div>
-      </div>
+      )}
+
+      {submittedSearch && (
+        <p className="search-results-count">
+          {filteredNotes.length} result{filteredNotes.length !== 1 ? "s" : ""}{" "}
+          for "{submittedSearch}"
+        </p>
+      )}
+
+      {/* ← wrap grid and no-results in a conditional */}
+      {submittedSearch && filteredNotes.length === 0 ? (
+        <div className="empty-card">
+          <div className="empty-icon-ring">
+            <span className="empty-icon">🔎</span>
+          </div>
+          <h2 className="empty-title">No Results Found</h2>
+          <p className="empty-desc">
+            No files matched "<strong>{submittedSearch}</strong>". Try a
+            different title or subject.
+          </p>
+          <button
+            className="empty-upload-btn"
+            onClick={() => {
+              setSearch("");
+              setSubmittedSearch("");
+            }}
+          >
+            Clear Search
+          </button>
+        </div>
+      ) : (
+        <div className="notes-grid-container">
+          <div className="notes-grid">
+            {filteredNotes.map((note) => {
+              // ... your existing card code stays exactly the same
+              const icon = fileIcon(note.metadata?.keyvalues?.fileType);
+              const title =
+                note.metadata?.keyvalues?.title || note.metadata?.name;
+              const subject = note.metadata?.keyvalues?.subject;
+              const description = note.metadata?.keyvalues?.description;
+
+              return (
+                <div className="note-card" key={note.ipfs_pin_hash}>
+                  <div className="note-card-glow" />
+                  <div className="note-header">
+                    <div className="note-icon-wrap">
+                      {icon ? (
+                        <img className="note-icon" src={icon} alt="file icon" />
+                      ) : (
+                        <span className="note-icon-fallback">📎</span>
+                      )}
+                    </div>
+                    <div className="note-header-text">
+                      <h3 className="note-title">{title}</h3>
+                      {subject && (
+                        <span className="note-subject">{subject}</span>
+                      )}
+                    </div>
+                    <button
+                      className="delete-btn"
+                      onClick={() => handleDeleteClick(note)}
+                      title="Delete this file"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+
+                  {description && (
+                    <p className="note-description">{description}</p>
+                  )}
+
+                  <div className="note-footer">
+                    <span className="note-uploader">
+                      👤{" "}
+                      {note.metadata?.keyvalues?.uploader === "Anonymous"
+                        ? `${username} ( Anonymous )`
+                        : username}
+                    </span>
+                    <a
+                      href={`https://gateway.pinata.cloud/ipfs/${note.ipfs_pin_hash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="view-btn"
+                    >
+                      View File
+                    </a>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {showConfirm && (
         <div className="modal-backdrop" onClick={handleDeleteCancel}>

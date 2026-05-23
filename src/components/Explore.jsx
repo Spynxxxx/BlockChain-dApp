@@ -10,13 +10,31 @@ import ppt from "../icons/ppt.png";
 function Explore({ courseCode, walletAddress, onNavigate }) {
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [submittedSearch, setSubmittedSearch] = useState("");
   const NOTES_PER_PAGE = 9;
   const [currentPage, setCurrentPage] = useState(1);
   const [savedHashes, setSavedHashes] = useState(new Set());
 
-  const totalPages = Math.ceil(notes.length / NOTES_PER_PAGE);
+  const filteredNotes = notes.filter((note) => {
+    const q = submittedSearch.toLowerCase();
+    if (!q) return true;
+    const title = note.metadata?.keyvalues?.title?.toLowerCase() || "";
+    const subject = note.metadata?.keyvalues?.subject?.toLowerCase() || "";
+    return title.includes(q) || subject.includes(q);
+  });
+
+  const totalPages = Math.ceil(filteredNotes.length / NOTES_PER_PAGE);
   const startIndex = (currentPage - 1) * NOTES_PER_PAGE;
-  const currentNotes = notes.slice(startIndex, startIndex + NOTES_PER_PAGE);
+  const currentNotes = filteredNotes.slice(
+    startIndex,
+    startIndex + NOTES_PER_PAGE,
+  );
+  function handleSearch() {
+    setSubmittedSearch(search);
+    if (search.trim()) setCurrentPage(1); // only for Explore
+  }
+
   useEffect(() => {
     async function fetchFiles() {
       setCurrentPage(1);
@@ -188,108 +206,155 @@ function Explore({ courseCode, walletAddress, onNavigate }) {
           </div>
         </div>
         <p className="explore-subtitle">
-          {notes.length} note{notes.length !== 1 ? "s" : ""} available in your
-          course.
+          {filteredNotes.length} note{filteredNotes.length !== 1 ? "s" : ""}{" "}
+          available in your course. course.
         </p>
       </div>
-
-      <div className="notes-grid-container">
-        <div className="notes-grid">
-          {currentNotes.map((note) => {
-            const icon = fileIcon(note.metadata?.keyvalues?.fileType);
-            const title =
-              note.metadata?.keyvalues?.title || note.metadata?.name;
-            const subject = note.metadata?.keyvalues?.subject;
-            const description = note.metadata?.keyvalues?.description;
-            const uploader = note.metadata?.keyvalues?.uploader;
-
-            return (
-              <div className="note-card" key={note.ipfs_pin_hash}>
-                <div className="note-card-glow" />
-
-                <div className="note-header">
-                  <div className="note-icon-wrap">
-                    {icon ? (
-                      <img className="note-icon" src={icon} alt="file icon" />
-                    ) : (
-                      <span className="note-icon-fallback">📎</span>
-                    )}
-                  </div>
-                  <div className="note-header-text">
-                    <h3 className="note-title">{title}</h3>
-                    {subject && <span className="note-subject">{subject}</span>}
-                  </div>
-
-                  <button
-                    className={`save-btn ${savedHashes.has(note.ipfs_pin_hash) ? "save-btn-active" : ""}`}
-                    onClick={() => toggleSave(note)}
-                    title={
-                      savedHashes.has(note.ipfs_pin_hash)
-                        ? "Remove from My Notes"
-                        : "Save to My Notes"
-                    }
-                  >
-                    {savedHashes.has(note.ipfs_pin_hash) ? "🗂️" : "📁"}
-                  </button>
-                </div>
-
-                {description && (
-                  <p className="note-description">{description}</p>
-                )}
-
-                <div className="note-footer">
-                  {uploader && (
-                    <span className="note-uploader" title={uploader}>
-                      👤 {uploader}
-                    </span>
-                  )}
-                  <a
-                    href={`https://gateway.pinata.cloud/ipfs/${note.ipfs_pin_hash}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="view-btn"
-                  >
-                    View File
-                  </a>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-        {totalPages > 1 && (
-          <div className="pagination">
-            <button
-              className="page-btn"
-              onClick={() => setCurrentPage((p) => p - 1)}
-              disabled={currentPage === 1}
-            >
-              ← Prev
-            </button>
-
-            <div className="page-numbers">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                (num) => (
-                  <button
-                    key={num}
-                    className={`page-num ${currentPage === num ? "page-active" : ""}`}
-                    onClick={() => setCurrentPage(num)}
-                  >
-                    {num}
-                  </button>
-                ),
-              )}
-            </div>
-
-            <button
-              className="page-btn"
-              onClick={() => setCurrentPage((p) => p + 1)}
-              disabled={currentPage === totalPages}
-            >
-              Next →
-            </button>
-          </div>
+      <div className="search-bar">
+        <span className="search-icon">🔍</span>
+        <input
+          type="text"
+          placeholder="Search by title or subject..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+          className="search-input"
+        />
+        {search && (
+          <button
+            className="search-clear"
+            onClick={() => {
+              setSearch("");
+              setSubmittedSearch(""); // ← clears results too
+            }}
+          >
+            ✕
+          </button>
         )}
+        <button className="search-submit-btn" onClick={handleSearch}>
+          Search
+        </button>
       </div>
+      {submittedSearch && filteredNotes.length === 0 ? (
+        <div className="empty-card">
+          <div className="empty-icon-ring">
+            <span className="empty-icon">🔎</span>
+          </div>
+          <h2 className="empty-title">No Results Found</h2>
+          <p className="empty-desc">
+            No files matched "<strong>{submittedSearch}</strong>". Try a
+            different title or subject.
+          </p>
+          <button
+            className="empty-upload-btn"
+            onClick={() => {
+              setSearch("");
+              setSubmittedSearch("");
+            }}
+          >
+            Clear Search
+          </button>
+        </div>
+      ) : (
+        <div className="notes-grid-container">
+          <div className="notes-grid">
+            {currentNotes.map((note) => {
+              const icon = fileIcon(note.metadata?.keyvalues?.fileType);
+              const title =
+                note.metadata?.keyvalues?.title || note.metadata?.name;
+              const subject = note.metadata?.keyvalues?.subject;
+              const description = note.metadata?.keyvalues?.description;
+              const uploader = note.metadata?.keyvalues?.uploader;
+              return (
+                <div className="note-card" key={note.ipfs_pin_hash}>
+                  <div className="note-card-glow" />
+
+                  <div className="note-header">
+                    <div className="note-icon-wrap">
+                      {icon ? (
+                        <img className="note-icon" src={icon} alt="file icon" />
+                      ) : (
+                        <span className="note-icon-fallback">📎</span>
+                      )}
+                    </div>
+                    <div className="note-header-text">
+                      <h3 className="note-title">{title}</h3>
+                      {subject && (
+                        <span className="note-subject">{subject}</span>
+                      )}
+                    </div>
+
+                    <button
+                      className={`save-btn ${savedHashes.has(note.ipfs_pin_hash) ? "save-btn-active" : ""}`}
+                      onClick={() => toggleSave(note)}
+                      title={
+                        savedHashes.has(note.ipfs_pin_hash)
+                          ? "Remove from My Notes"
+                          : "Save to My Notes"
+                      }
+                    >
+                      {savedHashes.has(note.ipfs_pin_hash) ? "🗂️" : "📁"}
+                    </button>
+                  </div>
+
+                  {description && (
+                    <p className="note-description">{description}</p>
+                  )}
+
+                  <div className="note-footer">
+                    {uploader && (
+                      <span className="note-uploader" title={uploader}>
+                        👤 {uploader}
+                      </span>
+                    )}
+                    <a
+                      href={`https://gateway.pinata.cloud/ipfs/${note.ipfs_pin_hash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="view-btn"
+                    >
+                      View File
+                    </a>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          {totalPages > 1 && (
+            <div className="pagination">
+              <button
+                className="page-btn"
+                onClick={() => setCurrentPage((p) => p - 1)}
+                disabled={currentPage === 1}
+              >
+                ← Prev
+              </button>
+
+              <div className="page-numbers">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (num) => (
+                    <button
+                      key={num}
+                      className={`page-num ${currentPage === num ? "page-active" : ""}`}
+                      onClick={() => setCurrentPage(num)}
+                    >
+                      {num}
+                    </button>
+                  ),
+                )}
+              </div>
+
+              <button
+                className="page-btn"
+                onClick={() => setCurrentPage((p) => p + 1)}
+                disabled={currentPage === totalPages}
+              >
+                Next →
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
