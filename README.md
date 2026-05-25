@@ -85,7 +85,6 @@ ShareEtH operates on a modern JavaScript and Web3 stack:
 - **Cardano / Lace** — The blockchain layer and browser extension wallet for handling user auth and the 1 ADA loopback transaction.
 - **Blockfrost** — The API layer facilitating seamless communication with the Cardano blockchain.
 - **MongoDB** — NoSQL database utilized for storing user registration data and indexing file metadata.
-- **localStorage** — Temporary browser caching used to rapidly fetch uploaded note records.
 
 ---
 
