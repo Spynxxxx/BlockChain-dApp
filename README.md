@@ -74,7 +74,7 @@ Below is the core structural schematic for the `shareth-backend` API and the `sr
 
 ---
 
-## 🎛️ Telemetry / Tech Stack
+## Tech Stack
 
 ShareEtH operates on a modern JavaScript and Web3 stack:
 
