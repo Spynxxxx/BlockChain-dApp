@@ -1,7 +1,7 @@
 import * as CSL from "@emurgo/cardano-serialization-lib-browser";
 
-const BLOCKFROST_KEY = "previewN4X6fbUhv9PpRgsZq48fVfTcNLcc99tf";
-const BLOCKFROST_URL = "https://cardano-preview.blockfrost.io/api/v0";
+const BLOCKFROST_KEY = import.meta.env.VITE_BLOCKFROST_KEY;
+const BLOCKFROST_URL = import.meta.env.VITE_BLOCKFROST_URL;
 
 async function fetchBlockfrost(endpoint) {
   const res = await fetch(`${BLOCKFROST_URL}${endpoint}`, {
@@ -117,7 +117,6 @@ export async function sendUploadFee(laceApi, metadata) {
 
     txBuilder.add_change_if_needed(CSL.Address.from_hex(changeAddr));
 
-    // sign
     const unsignedTx = txBuilder.build_tx();
     const unsignedTxHex = bytesToHex(unsignedTx.to_bytes());
     const witnessHex = await laceApi.signTx(unsignedTxHex, true);
@@ -130,7 +129,6 @@ export async function sendUploadFee(laceApi, metadata) {
 
     const signedTxHex = bytesToHex(signedTx.to_bytes());
 
-    // submit
     const submitRes = await fetch(`${BLOCKFROST_URL}/tx/submit`, {
       method: "POST",
       headers: {
@@ -151,9 +149,6 @@ export async function sendUploadFee(laceApi, metadata) {
     console.error("Transaction error:", err);
     throw err;
   }
-
-  // send 1 ADA back to user
-  // 1 ADA in lovelace
   txBuilder.add_output(
     CSL.TransactionOutput.new(
       CSL.Address.from_bech32(recipientAddr),

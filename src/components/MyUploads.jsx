@@ -60,7 +60,6 @@ function MyUploads({ walletAddress, username, onNavigate }) {
       setShowConfirm(false);
       setSelectedNote(null);
     } catch (err) {
-      console.error("Delete failed:", err.message);
       alert("❌ Failed to delete file. Please try again.");
     } finally {
       setDeleting(false);

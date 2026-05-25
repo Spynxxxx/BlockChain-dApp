@@ -1,8 +1,8 @@
 import { useState } from "react";
 import * as CSL from "@emurgo/cardano-serialization-lib-browser";
 
-const BLOCKFROST_KEY = "previewN4X6fbUhv9PpRgsZq48fVfTcNLcc99tf";
-const BLOCKFROST_URL = "https://cardano-preview.blockfrost.io/api/v0";
+const BLOCKFROST_KEY = import.meta.env.VITE_BLOCKFROST_KEY;
+const BLOCKFROST_URL = import.meta.env.VITE_BLOCKFROST_URL;
 
 async function fetchBlockfrost(endpoint) {
   const res = await fetch(`${BLOCKFROST_URL}${endpoint}`, {
@@ -29,14 +29,14 @@ function hexToBytes(hex) {
 }
 
 async function buildAndSignTx({ laceApi, toAddress, lovelace }) {
-  const utxosCbor  = await laceApi.getUtxos();
+  const utxosCbor = await laceApi.getUtxos();
   const changeAddr = await laceApi.getChangeAddress();
 
   if (!utxosCbor || utxosCbor.length === 0)
     throw new Error("Insufficient ADA. Your wallet appears to be empty.");
 
   const params = await fetchBlockfrost("/epochs/latest/parameters");
-  const tip    = await fetchBlockfrost("/blocks/latest");
+  const tip = await fetchBlockfrost("/blocks/latest");
 
   const coinsPerUtxoByte =
     params.coins_per_utxo_size ?? params.coins_per_utxo_word ?? "4310";
@@ -45,8 +45,8 @@ async function buildAndSignTx({ laceApi, toAddress, lovelace }) {
     .fee_algo(
       CSL.LinearFee.new(
         CSL.BigNum.from_str(String(params.min_fee_a)),
-        CSL.BigNum.from_str(String(params.min_fee_b))
-      )
+        CSL.BigNum.from_str(String(params.min_fee_b)),
+      ),
     )
     .pool_deposit(CSL.BigNum.from_str(String(params.pool_deposit)))
     .key_deposit(CSL.BigNum.from_str(String(params.key_deposit)))
@@ -62,24 +62,22 @@ async function buildAndSignTx({ laceApi, toAddress, lovelace }) {
     txBuilder.add_regular_input(
       utxo.output().address(),
       utxo.input(),
-      utxo.output().amount()
+      utxo.output().amount(),
     );
   }
 
   txBuilder.add_output(
     CSL.TransactionOutput.new(
       CSL.Address.from_bech32(toAddress),
-      CSL.Value.new(CSL.BigNum.from_str(lovelace))
-    )
+      CSL.Value.new(CSL.BigNum.from_str(lovelace)),
+    ),
   );
 
-  txBuilder.set_ttl_bignum(
-    CSL.BigNum.from_str(String(tip.slot + 7200))
-  );
+  txBuilder.set_ttl_bignum(CSL.BigNum.from_str(String(tip.slot + 7200)));
 
   txBuilder.add_change_if_needed(CSL.Address.from_hex(changeAddr));
 
-  const unsignedTx    = txBuilder.build_tx();
+  const unsignedTx = txBuilder.build_tx();
   const unsignedTxHex = bytesToHex(unsignedTx.to_bytes());
 
   const witnessHex = await laceApi.signTx(unsignedTxHex, true);
@@ -87,19 +85,18 @@ async function buildAndSignTx({ laceApi, toAddress, lovelace }) {
   const signedTx = CSL.Transaction.new(
     unsignedTx.body(),
     CSL.TransactionWitnessSet.from_hex(witnessHex),
-    unsignedTx.auxiliary_data()
+    unsignedTx.auxiliary_data(),
   );
 
   return bytesToHex(signedTx.to_bytes());
 }
 
-
 function Transaction() {
   const [toAddress, setToAddress] = useState("");
-  const [amount, setAmount]       = useState("");
-  const [status, setStatus]       = useState(null);
-  const [txHash, setTxHash]       = useState(null);
-  const [loading, setLoading]     = useState(false);
+  const [amount, setAmount] = useState("");
+  const [status, setStatus] = useState(null);
+  const [txHash, setTxHash] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   async function sendTransaction() {
     try {
@@ -112,7 +109,10 @@ function Transaction() {
         return;
       }
       if (!toAddress.trim().startsWith("addr_test1")) {
-        setStatus({ type: "error", msg: "Address must start with addr_test1..." });
+        setStatus({
+          type: "error",
+          msg: "Address must start with addr_test1...",
+        });
         return;
       }
 
@@ -130,18 +130,23 @@ function Transaction() {
 
       const networkId = await laceApi.getNetworkId();
       if (networkId !== 0) {
-        setStatus({ type: "error", msg: "Please switch Lace to Preview network." });
+        setStatus({
+          type: "error",
+          msg: "Please switch Lace to Preview network.",
+        });
         setLoading(false);
         return;
       }
 
       try {
         const usedAddresses = await laceApi.getUsedAddresses();
-        const walletAddr    = usedAddresses?.[0];
+        const walletAddr = usedAddresses?.[0];
         if (walletAddr) {
-          const info        = await fetchBlockfrost(`/addresses/${walletAddr}`);
-          const lovelaceBal = parseInt(info.amount?.find(a => a.unit === "lovelace")?.quantity ?? "0");
-          const balAda      = lovelaceBal / 1_000_000;
+          const info = await fetchBlockfrost(`/addresses/${walletAddr}`);
+          const lovelaceBal = parseInt(
+            info.amount?.find((a) => a.unit === "lovelace")?.quantity ?? "0",
+          );
+          const balAda = lovelaceBal / 1_000_000;
           if (balAda < parsedAmount + 0.5) {
             setStatus({
               type: "error",
@@ -151,12 +156,10 @@ function Transaction() {
             return;
           }
         }
-      } catch {
-        console.warn("Balance pre-check skipped.");
-      }
+      } catch {}
 
       setStatus({ type: "info", msg: "Building transaction..." });
-      const lovelace    = Math.floor(parsedAmount * 1_000_000).toString();
+      const lovelace = Math.floor(parsedAmount * 1_000_000).toString();
       const signedTxHex = await buildAndSignTx({
         laceApi,
         toAddress: toAddress.trim(),
@@ -179,19 +182,20 @@ function Transaction() {
       }
 
       const hash = (await submitRes.text()).replace(/"/g, "");
-      console.log("Transaction Hash:", hash);
 
       setTxHash(hash);
       setStatus({ type: "success", msg: "Transaction confirmed! ✅" });
       setToAddress("");
       setAmount("");
-
     } catch (err) {
       console.error("Transaction Error:", err);
 
       let msg = "Transaction failed.";
       if (err?.message) {
-        if (err.message.includes("Insufficient") || err.message.includes("UTxO")) {
+        if (
+          err.message.includes("Insufficient") ||
+          err.message.includes("UTxO")
+        ) {
           msg = "Insufficient ADA balance (include ~0.5 ADA for fees).";
         } else if (err.message.toLowerCase().includes("declined")) {
           msg = "Transaction rejected in wallet.";

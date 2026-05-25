@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useWallet } from "../hooks/useWallet";
 import { getUserProfile } from "../hooks/useAuth";
 import Header from "./Header";
+import MyUploads from "./MyUploads";
 import GridBackground from "./GridBackground";
 import Transaction from "./Transaction";
 import Upload from "./Upload";
@@ -10,7 +11,6 @@ import MyNotes from "./MyNotes";
 import CourseCodeModal from "./CourseCodeModal";
 import "../styles/Header.css";
 import "../styles/Transaction.css";
-import MyUploads from "./MyUploads";
 
 function App() {
   const wallet = useWallet();
@@ -40,7 +40,6 @@ function App() {
           setShowModal(true);
         }
       } catch (err) {
-        console.error("Failed to check profile:", err.message);
         if (err.message === "NETWORK_ERROR") {
           setShowModal(false);
           alert(

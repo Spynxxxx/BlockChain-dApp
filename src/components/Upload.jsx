@@ -78,13 +78,10 @@ function Upload({ walletApi, walletAddress, courseCode, username }) {
     setIpfsLink(null);
 
     try {
-      // ── Step 1: Send 1 ADA transaction on Cardano ─────────────
       setStatus({
         type: "info",
         msg: "💳 Please approve 1 ADA transaction in Lace...",
       });
-      console.log("walletApi:", walletApi); // ← add this
-      console.log("Starting transaction...");
       const txHash = await sendUploadFee(walletApi, {
         title: title.trim(),
         subject: subject.trim(),
@@ -99,7 +96,6 @@ function Upload({ walletApi, walletAddress, courseCode, username }) {
         msg: `✅ Transaction confirmed! Now uploading to IPFS...`,
       });
 
-      // ── Step 2: Upload file to IPFS ───────────────────────────
       const cid = await uploadToIPFS(file, {
         title: title.trim(),
         subject: subject.trim(),
@@ -124,7 +120,6 @@ function Upload({ walletApi, walletAddress, courseCode, username }) {
       setDescription("");
     } catch (err) {
       console.error(err);
-      // if user rejected the transaction, don't upload to IPFS
       if (
         err.message?.toLowerCase().includes("declined") ||
         err.message?.toLowerCase().includes("user")

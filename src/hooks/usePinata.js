@@ -19,7 +19,6 @@ export async function uploadToIPFS(file, metadataData) {
   });
   formData.append("pinataMetadata", metadata);
 
-  // makes a duplicate file in a folder to allow reupload
   const options = JSON.stringify({
     cidVersion: 1,
     wrapWithDirectory: true,
@@ -97,7 +96,6 @@ export async function getMyUploads(username) {
 }
 
 export async function unpinFile(ipfsHash) {
-  // delete file
   const cid = ipfsHash.split("/")[0];
 
   const res = await fetch(`https://api.pinata.cloud/pinning/unpin/${cid}`, {

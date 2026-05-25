@@ -23,7 +23,6 @@ function MyNotes({ walletAddress, onNavigate }) {
         const saved = await getSavedNotes(walletAddress);
         setNotes(saved);
       } catch (err) {
-        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -35,9 +34,7 @@ function MyNotes({ walletAddress, onNavigate }) {
     try {
       await unsaveNote(walletAddress, ipfsHash);
       setNotes((prev) => prev.filter((n) => n.ipfsHash !== ipfsHash));
-    } catch (err) {
-      console.error("Failed to unsave:", err.message);
-    }
+    } catch (err) {}
   }
 
   function fileIcon(type) {

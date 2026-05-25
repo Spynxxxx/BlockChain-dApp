@@ -27,7 +27,6 @@ function CourseCodeModal({ walletAddress, onSuccess }) {
       await registerUser(walletAddress, selected, username.trim());
       onSuccess(selected, username.trim());
     } catch (err) {
-      console.error(err);
       if (err.message === "NETWORK_ERROR") {
         setError("Cannot connect to server. Make sure the backend is running.");
       } else {

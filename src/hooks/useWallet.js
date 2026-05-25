@@ -68,7 +68,6 @@ export function useWallet() {
       try {
         await enableWallet();
       } catch (e) {
-        console.warn("Auto-reconnect failed:", e.message);
         localStorage.removeItem("walletConnected");
       } finally {
         setConnecting(false);

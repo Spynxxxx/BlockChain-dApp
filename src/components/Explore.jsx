@@ -32,7 +32,7 @@ function Explore({ courseCode, walletAddress, onNavigate }) {
   );
   function handleSearch() {
     setSubmittedSearch(search);
-    if (search.trim()) setCurrentPage(1); // only for Explore
+    if (search.trim()) setCurrentPage(1);
   }
 
   useEffect(() => {
@@ -52,7 +52,6 @@ function Explore({ courseCode, walletAddress, onNavigate }) {
         setNotes(files);
         setSavedHashes(new Set(saved.map((n) => n.ipfsHash)));
       } catch (err) {
-        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -77,7 +76,6 @@ function Explore({ courseCode, walletAddress, onNavigate }) {
         await saveNote(walletAddress, note);
       }
     } catch (err) {
-      console.error("Toggle save failed:", err.message);
       setSavedHashes((prev) => {
         const next = new Set(prev);
         isSaved ? next.add(hash) : next.delete(hash);
@@ -95,7 +93,6 @@ function Explore({ courseCode, walletAddress, onNavigate }) {
     return null;
   }
 
-  //wallet wapa na connect sa lace
   if (!walletAddress) {
     return (
       <div className="explore-container">
@@ -119,7 +116,6 @@ function Explore({ courseCode, walletAddress, onNavigate }) {
     );
   }
 
-  // connected sa lace pero walay sulod ang files
   if (!courseCode) {
     return (
       <div className="explore-container">
@@ -207,7 +203,7 @@ function Explore({ courseCode, walletAddress, onNavigate }) {
         </div>
         <p className="explore-subtitle">
           {filteredNotes.length} note{filteredNotes.length !== 1 ? "s" : ""}{" "}
-          available in your course. course.
+          available in your course.
         </p>
       </div>
       <div className="search-bar">
@@ -225,7 +221,7 @@ function Explore({ courseCode, walletAddress, onNavigate }) {
             className="search-clear"
             onClick={() => {
               setSearch("");
-              setSubmittedSearch(""); // ← clears results too
+              setSubmittedSearch("");
             }}
           >
             ✕
