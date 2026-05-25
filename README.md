@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🚀 ShareEtH
+# ShareEtH
 
 **A Decentralized Academic Knowledge Base & Storage Protocol**
 
